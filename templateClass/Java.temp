@@ -1,0 +1,15 @@
+package %package__name% 
+\n
+[[name=imports
+public class %class_name% 
+{
+\n
+
+[[name=attributs
+\n
+[[name=constructor
+
+
+[[setters
+[[getters
+} 

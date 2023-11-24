@@ -1,0 +1,10 @@
+[[name=imports
+public class %class_name% 
+{
+\n
+
+[[name=attributs:get:set
+\n
+[[name=constructor
+
+} 
