@@ -1,11 +1,17 @@
 package com.frame.naina.func;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+
+import org.springframework.util.ResourceUtils;
+
+import com.frame.naina.Data.Template;
 
 public class Input {
 
@@ -15,12 +21,14 @@ public class Input {
     String packageName = "com.frame.naina.result";
     String langage = "JAVA";
     String pathFile = "./";
+    String templateFile;
     List<String> imports = new ArrayList<String>();
 
     public void ask() throws IOException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
         askDatabases(reader);
         askLangage(reader);
+        askTemplateFile(reader);
         askPathFile(reader);
         askPackageName(reader);
         askImports(reader);
@@ -80,6 +88,25 @@ public class Input {
         System.out.println("");
     }
 
+    public void askTemplateFile(BufferedReader bufferedReader) throws IOException {
+
+        Boolean fileExist = false;
+        while (!fileExist) {
+            System.out.println("Your template file [ default for " + this.langage + " ] : ");
+            bufferedReader = new BufferedReader(new InputStreamReader(System.in));
+            String tempFile = bufferedReader.readLine();
+            this.templateFile = empty(tempFile) ? Template.getTemplateFile(this.langage, null) : tempFile;
+            if (!isFileTemplateExist(this.templateFile))
+                System.out.println("ERROR : The file specified can't be found ");
+            else {
+                fileExist = true;
+                break;
+            }
+            System.out.println("");
+        }
+
+    }
+
     public void askPackageName(BufferedReader bufferedReader) throws IOException {
 
         System.out.println("Package name [" + this.packageName + "] : ");
@@ -117,6 +144,12 @@ public class Input {
         return equivalence;
     }
 
+    public Boolean isFileTemplateExist(String filePath) throws FileNotFoundException {
+        File fileInRessource = ResourceUtils.getFile("./" + filePath);
+
+        return fileInRessource.exists() ? true : false;
+    }
+
     public Boolean empty(String text) {
         if (text.trim().equals("") || text == null)
             return true;
@@ -138,6 +171,14 @@ public class Input {
 
     public void setDatabaseUsername(String databaseUsername) {
         this.databaseUsername = databaseUsername;
+    }
+
+    public String getTemplateFile() {
+        return templateFile;
+    }
+
+    public void setTemplateFile(String templateFile) {
+        this.templateFile = templateFile;
     }
 
     public String getPassword() {

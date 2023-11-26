@@ -29,10 +29,13 @@ public class EntityReader {
 
     private List<String> imports = new ArrayList<String>();
 
-    public EntityReader(String database, String username, String password) {
+    private String templateFile;
+
+    public EntityReader(String database, String username, String password, Input input) {
         this.database = database;
         this.username = username;
         this.password = password;
+        addInputData(input);
     }
 
     public void readTables() throws SQLException {
@@ -41,6 +44,7 @@ public class EntityReader {
         List<ClassBuilder> classes = getAllClassesSchemaBuilder(connect);
 
         for (ClassBuilder classBuilder : classes) {
+            classBuilder.setTemplateFile(templateFile);
             classBuilder.setPackageName(this.packageName);
             classBuilder.setTemplate(this.langage);
             classBuilder.setImports(imports);
@@ -86,6 +90,14 @@ public class EntityReader {
             String columnName = resultSetMD.getColumnName(i);
             System.out.println("Column " + i + ": " + columnName);
         }
+    }
+
+    public void addInputData(Input input) {
+        this.setPackageName(input.getPackageName());
+        this.setPathFile(input.getPathFile());
+        this.setTemplateFile(input.getTemplateFile());
+        this.setLangage(input.getLangage());
+        this.setImports(input.getImports());
     }
 
     public String getDatabase() {
@@ -142,6 +154,14 @@ public class EntityReader {
 
     public void setImports(List<String> imports) {
         this.imports = imports;
+    }
+
+    public String getTemplateFile() {
+        return templateFile;
+    }
+
+    public void setTemplateFile(String templateFile) {
+        this.templateFile = templateFile;
     }
 
 }

@@ -12,14 +12,10 @@ public class NainaApplication {
 
 		Input input = new Input();
 		input.ask();
-		System.out.println(input.toString());
 		EntityReader entityReader = new EntityReader(input.getDatabaseName(),
 				input.getDatabaseUsername(),
-				input.getPassword());
-		entityReader.setPackageName(input.getPackageName());
-		entityReader.setPathFile(input.getPathFile());
-		entityReader.setLangage(input.getLangage());
-		entityReader.setImports(input.getImports());
+				input.getPassword(), input);
+
 		entityReader.readTables();
 	}
 

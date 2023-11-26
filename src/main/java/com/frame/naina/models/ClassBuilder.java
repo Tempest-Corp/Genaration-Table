@@ -23,6 +23,8 @@ public class ClassBuilder {
 
     List<String> imports = new Vector<String>();
 
+    String templateFile;
+
     // Mila importation automatic raha ohatra ka mila anleh izy Timestamp ohatra ,
     // java.sql.Timestamp;
 
@@ -32,24 +34,21 @@ public class ClassBuilder {
 
     public void build(String filePath) {
         toCamelCaseClassName();
-        writeFile(filePath + this.className + "." + this.template.toLowerCase(),
-                buildContentFile(readFile(getTemplateFile())));
+        String contentFile = buildContentFile(readFile(this.templateFile));
+        String file = this.className + "." + this.template.toLowerCase();
+        writeFile(file,
+                contentFile, filePath);
     }
 
-    public String getTemplateFile() {
-        if (this.template.equals("JAVA"))
-            return "templateClass/Java.temp";
-
-        else if (this.template.equals("CS"))
-            return "templateClass/CS.temp";
-
-        throw new RuntimeException("Langage selected is not supported");
-    }
-
-    public void writeFile(String file, String content) {
-        Path filePath = Path.of(file);
+    public void writeFile(String file, String content, String pathFiles) {
         try {
-            // Write the content to the file
+            pathFiles = !pathFiles.startsWith("../") ? pathFiles.replaceFirst("./", "") : pathFiles;
+
+            String pathPackageName = pathFiles + packageToPath();
+            createFolder(pathPackageName);
+
+            Path filePath = Path.of(pathPackageName + "/" + file);
+
             Files.writeString(filePath, content, StandardCharsets.UTF_8, StandardOpenOption.CREATE,
                     StandardOpenOption.WRITE);
         } catch (IOException e) {
@@ -57,15 +56,29 @@ public class ClassBuilder {
         }
     }
 
+    public String packageToPath() {
+        return this.packageName.replaceAll("\\.", "/");
+    }
+
+    public void createFolder(String filePath) {
+
+        String[] folderPart = filePath.split("/");
+        String fileName = "";
+        for (String partFileName : folderPart) {
+            fileName += partFileName + "/";
+            File folder = new File(fileName);
+            if (!folder.exists())
+                folder.mkdir();
+        }
+
+    }
+
     public List<String> readFile(String file) {
         //
         List<String> lines = new Vector<String>();
         try {
 
-            // "classpath:" + file
-            File fileInRessource = ResourceUtils.getFile("./" + file);
-            System.out.println(fileInRessource.getName());
-            System.out.println(fileInRessource.getAbsolutePath());
+            File fileInRessource = ResourceUtils.getFile(file);
             Path filePath = Path.of(fileInRessource.getPath());
             // // Read all lines from the file
             lines = Files.readAllLines(filePath, StandardCharsets.UTF_8);
@@ -83,6 +96,15 @@ public class ClassBuilder {
         return content;
     }
 
+    public String inspectExtensionClassName(String line) {
+        if (line.contains("$ext_cn=")) {
+            String[] parts = line.split("=");
+            this.className = this.className + parts[1];
+            line = "\r";
+        }
+        return line;
+    }
+
     public String inspectLine(String line) {
         String line_inspected = "";
         line_inspected += switchWord(line);
@@ -90,7 +112,8 @@ public class ClassBuilder {
     }
 
     public String switchWord(String line) {
-        line = jumpDown(attributs(setters(getters(constructor(ClassName(imports(packageName(line))))))));
+        line = jumpDown(attributs(
+                setters(getters(constructor(ClassName(imports(inspectExtensionClassName(packageName(line)))))))));
         return line;
     }
 
@@ -279,7 +302,16 @@ public class ClassBuilder {
 
     @Override
     public String toString() {
-        return "ClassBuilder [className=" + className + ", columns=" + columns + "]";
+        return "ClassBuilder [className=" + className + ", columns=" + columns + ", template=" + template
+                + ", packageName=" + packageName + ", imports=" + imports + ", templateFile=" + templateFile + "]";
+    }
+
+    public String getTemplateFile() {
+        return templateFile;
+    }
+
+    public void setTemplateFile(String templateFile) {
+        this.templateFile = templateFile;
     }
 
 }
