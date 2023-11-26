@@ -176,11 +176,7 @@ public class ClassBuilder {
     public String packageName(String line) {
         String package_tag = "%package__name%";
         if (line.contains(package_tag)) {
-            if (this.template.equals("JAVA")) {
-                return line.replace(package_tag, this.packageName) + ";";
-            } else if (this.template.equals("DOTNET")) {
-                return ";";
-            }
+            return line.replace(package_tag, this.packageName) + ";";
         }
         return line;
     }
