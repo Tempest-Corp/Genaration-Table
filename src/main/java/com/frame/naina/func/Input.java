@@ -1,6 +1,7 @@
 package com.frame.naina.func;
 
 import java.io.BufferedReader;
+import java.io.Console;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -47,10 +48,17 @@ public class Input {
         String username = bufferedReader.readLine();
         this.databaseUsername = empty(username) ? this.databaseUsername : username;
 
-        System.out.print("password [" + this.password + "] : ");
-        bufferedReader = new BufferedReader(new InputStreamReader(System.in));
-        String password = bufferedReader.readLine();
-        this.password = empty(password) ? this.password : password;
+        handlePassword();
+    }
+
+    public void handlePassword() {
+        Console console = System.console();
+        if (console != null) {
+            char[] passwordArray = console.readPassword("password [" + this.password + "] : ");
+            String password = new String(passwordArray);
+            this.password = empty(password) ? this.password : password;
+            java.util.Arrays.fill(passwordArray, ' ');
+        }
         System.out.println("");
     }
 

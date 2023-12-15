@@ -21,11 +21,11 @@ public class EntityReader {
 
     private String password;
 
-    private String packageName = "com.frame.naina.result";
+    private String packageName;
 
-    private String pathFile = "./src/main/java/com/frame/naina/result/";
+    private String pathFile;
 
-    private String langage = "JAVA";
+    private String langage;
 
     private List<String> imports = new ArrayList<String>();
 
@@ -40,7 +40,6 @@ public class EntityReader {
 
     public void readTables() throws SQLException {
         Connection connect = Connect.getConnectionPostgresql(database, username, password);
-
         List<ClassBuilder> classes = getAllClassesSchemaBuilder(connect);
 
         for (ClassBuilder classBuilder : classes) {

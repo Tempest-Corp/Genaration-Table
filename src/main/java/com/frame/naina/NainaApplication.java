@@ -17,6 +17,8 @@ public class NainaApplication {
 				input.getPassword(), input);
 
 		entityReader.readTables();
+
+		System.out.println("Files generated successfully :)");
 	}
 
 }

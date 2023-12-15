@@ -12,7 +12,6 @@ public class Connect {
             con.setAutoCommit(false);
         } catch (Exception e) {
             System.out.println(e);
-
         }
         return con;
     }
