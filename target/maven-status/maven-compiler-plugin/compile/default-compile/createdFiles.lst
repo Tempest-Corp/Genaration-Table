@@ -1,4 +1,7 @@
+com\frame\naina\NainaApplication.class
 com\frame\naina\models\Column.class
+com\frame\naina\models\ClassBuilder.class
 com\frame\naina\func\Input.class
+com\frame\naina\Data\Template.class
 com\frame\naina\connection\Connect.class
 com\frame\naina\func\EntityReader.class

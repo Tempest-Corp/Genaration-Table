@@ -1,0 +1,10 @@
+package [[packageName]];
+
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+@RestController
+@RequestMapping(path = "")
+public class [[controllerName]] {
+
+}

@@ -32,6 +32,9 @@ public class ClassBuilder {
         this.className = className;
     }
 
+    public ClassBuilder() {
+    }
+
     public void build(String filePath) {
         toCamelCaseClassName();
         String contentFile = buildContentFile(readFile(this.templateFile));

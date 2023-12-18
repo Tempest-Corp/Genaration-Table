@@ -22,6 +22,8 @@ public class Template {
 
         templates.put("JAVA", "templateClass/Java.temp");
         templates.put("CS", "templateClass/CS.temp");
+        templates.put("SPRING_BOOT_CONTROLLER", "templateClass/SpringBoot.temp");
+        templates.put("CS_CONTROLLER", "templateClass/CsController.temp");
 
         return templates;
     }

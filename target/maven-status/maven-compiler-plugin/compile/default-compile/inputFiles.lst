@@ -1,7 +1,8 @@
-c:\Users\Jaona\Desktop\Naina\geta\src\main\java\com\frame\naina\func\Input.java
-c:\Users\Jaona\Desktop\Naina\geta\src\main\java\com\frame\naina\models\Column.java
-c:\Users\Jaona\Desktop\Naina\geta\src\main\java\com\frame\naina\NainaApplication.java
-c:\Users\Jaona\Desktop\Naina\geta\src\main\java\com\frame\naina\Data\Template.java
-c:\Users\Jaona\Desktop\Naina\geta\src\main\java\com\frame\naina\func\EntityReader.java
-c:\Users\Jaona\Desktop\Naina\geta\src\main\java\com\frame\naina\connection\Connect.java
-c:\Users\Jaona\Desktop\Naina\geta\src\main\java\com\frame\naina\models\ClassBuilder.java
+D:\S5\Naina framework\Generation-Table\src\main\java\com\frame\naina\models\ClassBuilder.java
+D:\S5\Naina framework\Generation-Table\src\main\java\com\frame\naina\NainaApplication.java
+D:\S5\Naina framework\Generation-Table\src\main\java\com\frame\naina\connection\Connect.java
+D:\S5\Naina framework\Generation-Table\src\main\java\com\frame\naina\func\Input.java
+D:\S5\Naina framework\Generation-Table\src\main\java\com\frame\naina\func\ControllerGenerator.java
+D:\S5\Naina framework\Generation-Table\src\main\java\com\frame\naina\func\EntityReader.java
+D:\S5\Naina framework\Generation-Table\src\main\java\com\frame\naina\models\Column.java
+D:\S5\Naina framework\Generation-Table\src\main\java\com\frame\naina\Data\Template.java
