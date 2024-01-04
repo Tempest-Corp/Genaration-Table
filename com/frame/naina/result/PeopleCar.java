@@ -1,4 +1,4 @@
-package com.frame.naina.result ;
+package com.frame.naina.result  ;
 
 public class PeopleCar {
 

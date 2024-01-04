@@ -25,6 +25,10 @@ public class ClassBuilder {
 
     String templateFile;
 
+    String langage;
+
+    ConfigClass configClass;
+
     // Mila importation automatic raha ohatra ka mila anleh izy Timestamp ohatra ,
     // java.sql.Timestamp;
 
@@ -33,6 +37,7 @@ public class ClassBuilder {
     }
 
     public void build(String filePath) {
+
         toCamelCaseClassName();
         String contentFile = buildContentFile(readFile(this.templateFile));
         String file = this.className + "." + this.template.toLowerCase();
@@ -119,6 +124,9 @@ public class ClassBuilder {
 
     public String setters(String line) {
         String setters = "";
+        if (!this.configClass.getFunc_get_set())
+            return line.replace("[[setters", "\n");
+
         if (line.contains("[[setters")) {
             for (Column column : columns) {
                 setters += column.setters() + "\n";
@@ -130,6 +138,10 @@ public class ClassBuilder {
 
     public String getters(String line) {
         String getters = "";
+
+        if (!this.configClass.getFunc_get_set())
+            return line.replace("[[getters", "\n");
+
         if (line.contains("[[getters")) {
             for (Column column : columns) {
                 getters += column.getters() + "\n";
@@ -143,10 +155,8 @@ public class ClassBuilder {
         String importsLines = "";
         if (line.contains("[[name=imports")) {
             for (String importRow : this.imports) {
-                if (this.template.equals("JAVA"))
-                    importsLines += "import " + importRow + ";\n";
-                else if (this.template.equals("CS"))
-                    importsLines += "using " + importRow + ";\n";
+                importsLines += this.configClass.getImport_var() + " " + importRow + this.configClass.getEnding()
+                        + "\n";
             }
         }
         line = line.replace("[[name=imports", "\n" + importsLines + "\n");
@@ -167,17 +177,24 @@ public class ClassBuilder {
     }
 
     public String getSet(String line) {
-        if (line.contains(":get:set")) {
+        if (line.contains(":get:set") && !this.configClass.getFunc_get_set()) {
             return " { get; set; } ";
         } else
-            return ";";
+            return this.configClass.getEnding();
     }
 
     public String packageName(String line) {
         String package_tag = "%package__name%";
-        if (line.contains(package_tag)) {
-            return line.replace(package_tag, this.packageName) + ";";
+        String package_var = "%package__var%";
+        String[] parts = line.split(" ");
+        for (String part : parts) {
+            if (part.trim().equals(package_tag)) {
+                line = line.replace(package_tag, this.packageName) + this.configClass.getEnding();
+            } else if (part.trim().equals(package_var)) {
+                line = line.replace(package_var, this.configClass.getPackage_var()) + " ";
+            }
         }
+
         return line;
     }
 
@@ -256,6 +273,10 @@ public class ClassBuilder {
         return params;
     }
 
+    public void setConfigClass(ConfigClass configClass) {
+        this.configClass = configClass;
+    }
+
     public String getClassName() {
         return className;
     }
@@ -308,6 +329,14 @@ public class ClassBuilder {
 
     public void setTemplateFile(String templateFile) {
         this.templateFile = templateFile;
+    }
+
+    public String getLangage() {
+        return langage;
+    }
+
+    public void setLangage(String langage) {
+        this.langage = langage;
     }
 
 }

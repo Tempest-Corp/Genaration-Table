@@ -1,7 +1,5 @@
 package com.frame.naina.models;
 
-import java.util.HashMap;
-
 public class Column {
 
     String name;
@@ -13,6 +11,8 @@ public class Column {
     String columnDef;
 
     String langage;
+
+    ConfigClass configClass;
 
     public Column(String name, String type, Boolean isNullable, String columnDef, String langage) {
         this.name = name;
@@ -38,7 +38,7 @@ public class Column {
 
     public String getTypeTemplate() {
         this.type = this.type.toUpperCase();
-        return getEquivalenceType(this.langage + "_" + this.type);
+        return this.configClass.getTypes().get(this.type);
     }
 
     public String toCamelCase(String text) {
@@ -62,30 +62,6 @@ public class Column {
             return true;
         else
             return false;
-    }
-
-    public static String getEquivalenceType(String type) {
-        HashMap<String, String> typeMap = new HashMap<String, String>();
-
-        // JAVA
-        typeMap.put("JAVA_VARCHAR", "String");
-        typeMap.put("JAVA_NUMERIC", "Double");
-        typeMap.put("JAVA_SERIAL", "Integer");
-        typeMap.put("JAVA_BOOL", "Boolean");
-        typeMap.put("JAVA_TIMESTAMP", "String");
-        typeMap.put("JAVA_INT4", "Integer");
-
-        // C#
-        typeMap.put("CS_VARCHAR", "string");
-        typeMap.put("CS_NUMERIC", "double");
-        typeMap.put("CS_SERIAL", "int");
-        typeMap.put("CS_BOOL", "Boolean");
-        typeMap.put("CS_TIMESTAMP", "string");
-        typeMap.put("CS_INT4", "int");
-
-        String equivalence = typeMap.get(type);
-
-        return equivalence != null ? equivalence : "String";
     }
 
     public String getName() {
@@ -118,6 +94,22 @@ public class Column {
 
     public void setColumnDef(String columnDef) {
         this.columnDef = columnDef;
+    }
+
+    public String getLangage() {
+        return langage;
+    }
+
+    public void setLangage(String langage) {
+        this.langage = langage;
+    }
+
+    public ConfigClass getConfigClass() {
+        return configClass;
+    }
+
+    public void setConfigClass(ConfigClass configClass) {
+        this.configClass = configClass;
     }
 
     @Override

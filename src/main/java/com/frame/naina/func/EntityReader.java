@@ -1,5 +1,6 @@
 package com.frame.naina.func;
 
+import java.io.FileNotFoundException;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
@@ -12,6 +13,7 @@ import java.util.Vector;
 import com.frame.naina.connection.Connect;
 import com.frame.naina.models.ClassBuilder;
 import com.frame.naina.models.Column;
+import com.frame.naina.models.ConfigClass;
 
 public class EntityReader {
 
@@ -38,7 +40,7 @@ public class EntityReader {
         addInputData(input);
     }
 
-    public void readTables() throws SQLException {
+    public void readTables() throws SQLException, FileNotFoundException {
         Connection connect = Connect.getConnectionPostgresql(database, username, password);
         List<ClassBuilder> classes = getAllClassesSchemaBuilder(connect);
 
@@ -47,30 +49,37 @@ public class EntityReader {
             classBuilder.setPackageName(this.packageName);
             classBuilder.setTemplate(this.langage);
             classBuilder.setImports(imports);
+            classBuilder.setLangage(this.langage);
             classBuilder.build(this.pathFile);
         }
 
         connect.close();
     }
 
-    public List<ClassBuilder> getAllClassesSchemaBuilder(Connection connection) throws SQLException {
+    public List<ClassBuilder> getAllClassesSchemaBuilder(Connection connection)
+            throws SQLException, FileNotFoundException {
         DatabaseMetaData metaData = connection.getMetaData();
         ResultSet resultSet = metaData.getTables(null, null, "%", new String[] {
                 "TABLE" });
         List<ClassBuilder> classes = new Vector<ClassBuilder>();
+        ConfigClass configClass = ConfigClass.getConfigClass(this.langage.toLowerCase());
 
         while (resultSet.next()) {
 
             String tableName = resultSet.getString("TABLE_NAME");
             ResultSet resCol = metaData.getColumns(null, null, tableName, null);
             ClassBuilder classBuilder = new ClassBuilder(tableName);
+            classBuilder.setConfigClass(configClass);
 
             while (resCol.next()) {
                 String columnName = resCol.getString("COLUMN_NAME");
                 String columnType = resCol.getString("TYPE_NAME");
                 String isNullable = resCol.getString("IS_NULLABLE");
                 String columnDefinition = resCol.getString("COLUMN_DEF");
-                classBuilder.getColumns().add(toColumn(columnName, columnType, isNullable, columnDefinition));
+
+                Column col = toColumn(columnName, columnType, isNullable, columnDefinition);
+                col.setConfigClass(configClass);
+                classBuilder.getColumns().add(col);
             }
             classes.add(classBuilder);
         }

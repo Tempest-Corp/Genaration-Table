@@ -1,4 +1,4 @@
-package %package__name% 
+%package__var% %package__name% 
 \n
 [[name=imports
 public class %class_name% 

@@ -18,7 +18,6 @@ public class NainaApplication {
 
 		entityReader.readTables();
 
-		System.out.println("Files generated successfully :)");
 	}
 
 }
