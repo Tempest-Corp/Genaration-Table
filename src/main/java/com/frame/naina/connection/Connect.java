@@ -4,7 +4,7 @@ import java.sql.*;
 
 public class Connect {
 
-    public static Connection getConnectionPostgresql(String database, String username, String password) {
+    public static Connection getConnection(String database, String username, String password) {
         Connection con = null;
         try {
             Class.forName("org.postgresql.Driver");

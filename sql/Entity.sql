@@ -1,4 +1,4 @@
--- CREATE DATABASE IF NOT EXISTS naina_entity ;
+-- CREATE DATABASE naina_entity ;
 
 CREATE TABLE people (
     id SERIAL PRIMARY KEY ,

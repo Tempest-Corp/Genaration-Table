@@ -1,0 +1,22 @@
+[
+  {
+    "id": 1,
+    "name": "PostgresSQL",
+    "driver": "org.postgresql.Driver",
+    "port": "5432",
+    "host": "localhost",
+    "user:name": "postgres",
+    "password": "popo",
+    "databaseName": "naina_entity"
+  },
+  {
+    "id": 2,
+    "name": "MongoDB",
+    "driver": "",
+    "port": "6544",
+    "host": "localhost",
+    "username": "popo",
+    "password": "popo",
+    "databaseName": "naina_entity"
+  }
+]

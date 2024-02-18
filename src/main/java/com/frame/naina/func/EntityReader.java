@@ -10,10 +10,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
+import com.frame.naina.Data.Language;
 import com.frame.naina.connection.Connect;
 import com.frame.naina.models.ClassBuilder;
 import com.frame.naina.models.Column;
-import com.frame.naina.models.ConfigClass;
 
 public class EntityReader {
 
@@ -31,7 +31,7 @@ public class EntityReader {
 
     private List<String> imports = new ArrayList<String>();
 
-    private String templateFile;
+    private String modelTemplate;
 
     public EntityReader(String database, String username, String password, Input input) {
         this.database = database;
@@ -41,15 +41,14 @@ public class EntityReader {
     }
 
     public void readTables() throws SQLException, FileNotFoundException {
-        Connection connect = Connect.getConnectionPostgresql(database, username, password);
+        Connection connect = Connect.getConnection(database, username, password);
         List<ClassBuilder> classes = getAllClassesSchemaBuilder(connect);
 
         for (ClassBuilder classBuilder : classes) {
-            classBuilder.setTemplateFile(templateFile);
+            classBuilder.setTemplateFile(this.modelTemplate);
             classBuilder.setPackageName(this.packageName);
             classBuilder.setTemplate(this.langage);
             classBuilder.setImports(imports);
-            classBuilder.setLangage(this.langage);
             classBuilder.build(this.pathFile);
         }
 
@@ -62,33 +61,58 @@ public class EntityReader {
         ResultSet resultSet = metaData.getTables(null, null, "%", new String[] {
                 "TABLE" });
         List<ClassBuilder> classes = new Vector<ClassBuilder>();
-        ConfigClass configClass = ConfigClass.getConfigClass(this.langage.toLowerCase());
 
+        Language configClass = Language.getLangageConfig(this.langage.toLowerCase());
         while (resultSet.next()) {
 
             String tableName = resultSet.getString("TABLE_NAME");
             ResultSet resCol = metaData.getColumns(null, null, tableName, null);
             ClassBuilder classBuilder = new ClassBuilder(tableName);
-            classBuilder.setConfigClass(configClass);
+            classBuilder.setlanguage(configClass);
 
             while (resCol.next()) {
                 String columnName = resCol.getString("COLUMN_NAME");
                 String columnType = resCol.getString("TYPE_NAME");
                 String isNullable = resCol.getString("IS_NULLABLE");
                 String columnDefinition = resCol.getString("COLUMN_DEF");
-
-                Column col = toColumn(columnName, columnType, isNullable, columnDefinition);
-                col.setConfigClass(configClass);
-                classBuilder.getColumns().add(col);
+                try {
+                    String fk_table_ref = isFK(connection, tableName, columnName, metaData);
+                    Column col = toColumn(columnName, columnType, isNullable, columnDefinition, fk_table_ref);
+                    col.setConfigClass(configClass);
+                    classBuilder.getColumns().add(col);
+                } catch (Exception e) {
+                }
             }
             classes.add(classBuilder);
+            resCol.close();
         }
+        resultSet.close();
         return classes;
     }
 
-    public Column toColumn(String columnName, String typeName, String isNullable, String definition) {
+    public String isFK(Connection connection, String tableName, String columnName, DatabaseMetaData metaData)
+            throws Exception {
+        ResultSet foreignKeys = metaData.getImportedKeys(connection.getCatalog(), null, tableName);
+        boolean isForeignKey = false;
+        String fk_column = null;
+        while (foreignKeys.next()) {
+            String fkColumnName = foreignKeys.getString("FKCOLUMN_NAME");
+            if (columnName.equals(fkColumnName)) {
+                isForeignKey = true;
+                String referencedTableName = foreignKeys.getString("PKTABLE_NAME");
+                fk_column = referencedTableName;
+                break;
+            }
+        }
+        return isForeignKey ? fk_column : null;
+    }
+
+    public Column toColumn(String columnName, String typeName, String isNullable, String definition,
+            String fk_ref_table) {
         Boolean is_nullable = Boolean.parseBoolean(isNullable);
-        return new Column(columnName, typeName, is_nullable, definition, this.langage);
+        Column column = new Column(columnName, typeName, is_nullable, definition, this.langage);
+        column.isFK(fk_ref_table);
+        return column;
     }
 
     public void showColumnResultSet(ResultSet resultSet) throws SQLException {
@@ -101,11 +125,14 @@ public class EntityReader {
     }
 
     public void addInputData(Input input) {
-        this.setPackageName(input.getPackageName());
-        this.setPathFile(input.getPathFile());
-        this.setTemplateFile(input.getTemplateFile());
-        this.setLangage(input.getLangage());
-        this.setImports(input.getImports());
+        if (input != null) {
+
+            this.setPackageName(input.getPackageName());
+            this.setPathFile(input.getPathFile());
+            this.setModelTemplate(input.getModelTemplate());
+            this.setLangage(input.getLangage());
+            this.setImports(input.getImports());
+        }
     }
 
     public String getDatabase() {
@@ -164,12 +191,12 @@ public class EntityReader {
         this.imports = imports;
     }
 
-    public String getTemplateFile() {
-        return templateFile;
+    public String getModelTemplate() {
+        return modelTemplate;
     }
 
-    public void setTemplateFile(String templateFile) {
-        this.templateFile = templateFile;
+    public void setModelTemplate(String modelTemplate) {
+        this.modelTemplate = modelTemplate;
     }
 
 }

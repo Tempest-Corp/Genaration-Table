@@ -1,5 +1,7 @@
 package com.frame.naina.models;
 
+import com.frame.naina.Data.Language;
+
 public class Column {
 
     String name;
@@ -12,7 +14,11 @@ public class Column {
 
     String langage;
 
-    ConfigClass configClass;
+    Boolean isFK;
+
+    String FK_ref_table;
+
+    Language configClass;
 
     public Column(String name, String type, Boolean isNullable, String columnDef, String langage) {
         this.name = name;
@@ -38,7 +44,12 @@ public class Column {
 
     public String getTypeTemplate() {
         this.type = this.type.toUpperCase();
-        return this.configClass.getTypes().get(this.type);
+        return isFK ? getFKTypeTemplate() : this.configClass.getTypes().get(this.type);
+    }
+
+    public String getFKTypeTemplate() {
+        String typeTemplate = toCamelCase(this.FK_ref_table);
+        return typeTemplate;
     }
 
     public String toCamelCase(String text) {
@@ -62,6 +73,14 @@ public class Column {
             return true;
         else
             return false;
+    }
+
+    public void isFK(String fk_ref_table) {
+        if (fk_ref_table != null) {
+            this.isFK = true;
+            this.FK_ref_table = fk_ref_table;
+        } else
+            this.isFK = false;
     }
 
     public String getName() {
@@ -104,12 +123,28 @@ public class Column {
         this.langage = langage;
     }
 
-    public ConfigClass getConfigClass() {
+    public Language getConfigClass() {
         return configClass;
     }
 
-    public void setConfigClass(ConfigClass configClass) {
+    public void setConfigClass(Language configClass) {
         this.configClass = configClass;
+    }
+
+    public Boolean getIsFK() {
+        return isFK;
+    }
+
+    public void setIsFK(Boolean isFK) {
+        this.isFK = isFK;
+    }
+
+    public String getFK_ref_table() {
+        return FK_ref_table;
+    }
+
+    public void setFK_ref_table(String fK_ref_table) {
+        FK_ref_table = fK_ref_table;
     }
 
     @Override

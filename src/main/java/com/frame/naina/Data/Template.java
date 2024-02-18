@@ -2,25 +2,35 @@ package com.frame.naina.Data;
 
 public class Template {
 
-    public static String getTemplateFile(String langage, String filePath) {
+    public String model, controller, view;
 
-        String templatePath = "";
-
-        if (filePath == null) {
-            // HashMap<String, String> templates = templateDefaultPath();
-            // templatePath = templates.get(langage);
-            templatePath = "templateClass/Class.temp";
-        } else
-            templatePath = filePath;
-
-        return templatePath;
+    public String getModel() {
+        return model;
     }
 
-    // public static HashMap<String, String> templateDefaultPath() {
-    // HashMap<String, String> templates = new HashMap<String, String>();
-    // templates.put("JAVA", "templateClass/Java.temp");
-    // templates.put("CS", "templateClass/CS.temp");
-    // return templates;
-    // }
+    public void setModel(String model) {
+        this.model = model;
+    }
+
+    public String getController() {
+        return controller;
+    }
+
+    public void setController(String controller) {
+        this.controller = controller;
+    }
+
+    public String getView() {
+        return view;
+    }
+
+    public void setView(String view) {
+        this.view = view;
+    }
+
+    @Override
+    public String toString() {
+        return "Template [model=" + model + ", controller=" + controller + ", view=" + view + "]";
+    }
 
 }

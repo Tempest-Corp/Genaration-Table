@@ -12,7 +12,11 @@ import java.util.List;
 
 import org.springframework.util.ResourceUtils;
 
-import com.frame.naina.Data.Template;
+import com.frame.naina.Data.Database;
+import com.frame.naina.Data.LandMark;
+import com.frame.naina.Data.Language;
+import com.frame.naina.Data.Setup;
+import com.frame.naina.utils.Transform;
 
 public class Input {
 
@@ -22,28 +26,62 @@ public class Input {
     String packageName = "com.frame.naina.result";
     String langage = "JAVA";
     String pathFile = "./";
-    String templateFile;
+    String modelTemplate;
     List<String> imports = new ArrayList<String>();
+    Database database;
+    Language language;
+    Setup setup;
+    //
+    Database[] allDatabases;
+    Language[] allLanguages;
 
     public void ask() throws IOException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-        askDatabases(reader);
-        askLangage(reader);
-        askTemplateFile(reader);
-        askPathFile(reader);
-        askPackageName(reader);
-        askImports(reader);
+        getConfigData();
+        if (!useDefaultValue(reader)) {
+            askDatabases(reader);
+            askLangage(reader);
+            askPathFile(reader);
+            askPackageName(reader);
+            askImports(reader);
+        }
+    }
+
+    public void getConfigData() {
+        try {
+            /// DATABASES
+            this.allDatabases = Transform.fromJson(Database[].class,
+                    Transform.getContent(LandMark.DATABASES_DATA));
+            this.database = this.allDatabases[0];
+            /// LANGUAGES
+            this.allLanguages = Transform.fromJson(Language[].class,
+                    Transform.getContent(LandMark.LANGUAGES_DATA));
+            this.language = this.allLanguages[0];
+            this.langage = this.language.getName().toUpperCase();
+            /// SETUP
+            this.setup = Transform.fromJson(Setup.class,
+                    Transform.getContent(LandMark.SETUP_DATA));
+            this.modelTemplate = this.setup.getTemplate().getModel();
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+    }
+
+    public Boolean useDefaultValue(BufferedReader bufferedReader) throws IOException {
+        System.out.println("Use the default value from config files ? : (Y/n)  ");
+        bufferedReader = new BufferedReader(new InputStreamReader(System.in));
+        return bufferedReader.readLine().toString().equalsIgnoreCase("Y");
     }
 
     public void askDatabases(BufferedReader bufferedReader) throws IOException {
         System.out.println("Enter your database information : ");
 
-        System.out.print("Name [" + this.databaseName + "] : ");
+        System.out.print("Name [" + this.database.getDatabaseName() + "] : ");
         bufferedReader = new BufferedReader(new InputStreamReader(System.in));
         String name = bufferedReader.readLine();
         this.databaseName = empty(name) ? this.databaseName : name;
 
-        System.out.print("Username [" + this.databaseUsername + "] : ");
+        System.out.print("Username [" + this.database.getUsername() + "] : ");
         bufferedReader = new BufferedReader(new InputStreamReader(System.in));
         String username = bufferedReader.readLine();
         this.databaseUsername = empty(username) ? this.databaseUsername : username;
@@ -54,7 +92,7 @@ public class Input {
     public void handlePassword() {
         Console console = System.console();
         if (console != null) {
-            char[] passwordArray = console.readPassword("password [" + this.password + "] : ");
+            char[] passwordArray = console.readPassword("password [" + this.getDatabase().getPassword() + "] : ");
             String password = new String(passwordArray);
             this.password = empty(password) ? this.password : password;
             java.util.Arrays.fill(passwordArray, ' ');
@@ -96,28 +134,9 @@ public class Input {
         System.out.println("");
     }
 
-    public void askTemplateFile(BufferedReader bufferedReader) throws IOException {
-
-        Boolean fileExist = false;
-        while (!fileExist) {
-            System.out.println("Your template file [ default for " + this.langage + " ] : ");
-            bufferedReader = new BufferedReader(new InputStreamReader(System.in));
-            String tempFile = bufferedReader.readLine();
-            this.templateFile = empty(tempFile) ? Template.getTemplateFile(this.langage, null) : tempFile;
-            if (!isFileTemplateExist(this.templateFile))
-                System.out.println("ERROR : The file specified can't be found ");
-            else {
-                fileExist = true;
-                break;
-            }
-            System.out.println("");
-        }
-
-    }
-
     public void askPackageName(BufferedReader bufferedReader) throws IOException {
 
-        System.out.println("Package name [" + this.packageName + "] : ");
+        System.out.println("Package name [" + this.language.getPackageSyntax().get("name") + "] : ");
         bufferedReader = new BufferedReader(new InputStreamReader(System.in));
         String packagename = bufferedReader.readLine();
         this.packageName = empty(packagename) ? this.packageName : packagename;
@@ -181,12 +200,36 @@ public class Input {
         this.databaseUsername = databaseUsername;
     }
 
-    public String getTemplateFile() {
-        return templateFile;
+    public String getModelTemplate() {
+        return modelTemplate;
     }
 
-    public void setTemplateFile(String templateFile) {
-        this.templateFile = templateFile;
+    public void setModelTemplate(String modelTemplate) {
+        this.modelTemplate = modelTemplate;
+    }
+
+    public Setup getSetup() {
+        return setup;
+    }
+
+    public void setSetup(Setup setup) {
+        this.setup = setup;
+    }
+
+    public Database[] getAllDatabases() {
+        return allDatabases;
+    }
+
+    public void setAllDatabases(Database[] allDatabases) {
+        this.allDatabases = allDatabases;
+    }
+
+    public Language[] getAllLanguages() {
+        return allLanguages;
+    }
+
+    public void setAllLanguages(Language[] allLanguages) {
+        this.allLanguages = allLanguages;
     }
 
     public String getPassword() {
@@ -227,6 +270,22 @@ public class Input {
 
     public void setPathFile(String pathFile) {
         this.pathFile = pathFile;
+    }
+
+    public Database getDatabase() {
+        return database;
+    }
+
+    public void setDatabase(Database database) {
+        this.database = database;
+    }
+
+    public Language getLanguage() {
+        return language;
+    }
+
+    public void setLanguage(Language language) {
+        this.language = language;
     }
 
     @Override

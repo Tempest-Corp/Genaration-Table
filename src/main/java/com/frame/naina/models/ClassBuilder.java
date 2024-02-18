@@ -11,6 +11,8 @@ import java.util.Vector;
 
 import org.springframework.util.ResourceUtils;
 
+import com.frame.naina.Data.Language;
+
 public class ClassBuilder {
 
     String className;
@@ -25,9 +27,7 @@ public class ClassBuilder {
 
     String templateFile;
 
-    String langage;
-
-    ConfigClass configClass;
+    Language language;
 
     // Mila importation automatic raha ohatra ka mila anleh izy Timestamp ohatra ,
     // java.sql.Timestamp;
@@ -83,6 +83,7 @@ public class ClassBuilder {
         List<String> lines = new Vector<String>();
         try {
 
+            @SuppressWarnings("null")
             File fileInRessource = ResourceUtils.getFile(file);
             Path filePath = Path.of(fileInRessource.getPath());
             // // Read all lines from the file
@@ -98,6 +99,7 @@ public class ClassBuilder {
         for (String line : linesTemplate) {
             content += inspectLine(line);
         }
+        content += "\n" + this.language.getPackageSyntax().get("start");
         return content;
     }
 
@@ -124,82 +126,81 @@ public class ClassBuilder {
 
     public String setters(String line) {
         String setters = "";
-        if (!this.configClass.getFunc_get_set())
-            return line.replace("[[setters", "\n");
+        if (!this.language.getFunc_get_set())
+            return line.replace("(setters)", "\n");
 
-        if (line.contains("[[setters")) {
+        if (line.contains("(setters)")) {
             for (Column column : columns) {
                 setters += column.setters() + "\n";
             }
         }
-        line = line.replace("[[setters", setters);
+        line = line.replace("(setters)", setters);
         return line;
     }
 
     public String getters(String line) {
         String getters = "";
 
-        if (!this.configClass.getFunc_get_set())
-            return line.replace("[[getters", "\n");
+        if (!this.language.getFunc_get_set())
+            return line.replace("(getters)", "\n");
 
-        if (line.contains("[[getters")) {
+        if (line.contains("(getters)")) {
             for (Column column : columns) {
                 getters += column.getters() + "\n";
             }
         }
-        line = line.replace("[[getters", getters);
+        line = line.replace("(getters)", getters);
         return line;
     }
 
     public String imports(String line) {
         String importsLines = "";
-        if (line.contains("[[name=imports")) {
+        if (line.contains("(imports)")) {
             for (String importRow : this.imports) {
-                importsLines += this.configClass.getImport_var() + " " + importRow + this.configClass.getEnding()
+                importsLines += this.language.getImport_var() + " " + importRow
+                        + this.language.getPackageSyntax().get("end")
                         + "\n";
             }
         }
-        line = line.replace("[[name=imports", "\n" + importsLines + "\n");
+        line = line.replace("(imports)", "\n" + importsLines + "\n");
         return line;
     }
 
     public String attributs(String line) {
         String importsLines = "";
-        if (line.contains("[[name=attributs")) {
+        if (line.contains("(attributs)")) {
             for (Column column : this.columns) {
                 importsLines += "\t " + column.getTypeTemplate() + " " + column.getName() + getSet(line) + "\n";
             }
-            line = line.replace("[[name=attributs", importsLines);
-            line = line.replace(":get:set", "");
+            line = line.replace("(attributs)", importsLines);
         }
 
         return line;
     }
 
     public String getSet(String line) {
-        if (line.contains(":get:set") && !this.configClass.getFunc_get_set()) {
+        if (line.contains(":get:set") && !this.language.getFunc_get_set()) {
             return " { get; set; } ";
         } else
-            return this.configClass.getEnding();
+            return this.language.getPackageSyntax().get("end");
     }
 
     public String packageName(String line) {
-        String package_tag = "%package__name%";
-        String package_var = "%package__var%";
+        String package_tag = "(package__name)";
+        String package_var = "(package__var)";
         String[] parts = line.split(" ");
         for (String part : parts) {
             if (part.trim().equals(package_tag)) {
-                line = line.replace(package_tag, this.packageName) + this.configClass.getEnding();
+                line = line.replace(package_tag, this.packageName) + this.language.getPackageSyntax().get("start");
             } else if (part.trim().equals(package_var)) {
-                line = line.replace(package_var, this.configClass.getPackage_var()) + " ";
+                line = line.replace(package_var, this.language.getPackageSyntax().get("variable")) + " ";
             }
         }
-
         return line;
     }
 
     public String ClassName(String line) {
-        String package_tag = "%class_name%";
+        String package_tag = "(class_name)";
         if (line.contains(package_tag)) {
             return line.replace(package_tag, this.className);
         }
@@ -244,12 +245,12 @@ public class ClassBuilder {
 
     public String constructor(String line) {
         String constLines = "";
-        if (line.contains("[[name=constructor")) {
+        if (line.contains("(constructor)")) {
 
             constLines += "\tpublic " + getClassName() + "(" + constructorParams() + "){\n"
                     + constructorInner() +
                     "\t}";
-            line = line.replace("[[name=constructor", constLines);
+            line = line.replace("(constructor)", constLines);
         }
 
         return line;
@@ -273,8 +274,8 @@ public class ClassBuilder {
         return params;
     }
 
-    public void setConfigClass(ConfigClass configClass) {
-        this.configClass = configClass;
+    public void setlanguage(Language language) {
+        this.language = language;
     }
 
     public String getClassName() {
@@ -329,14 +330,6 @@ public class ClassBuilder {
 
     public void setTemplateFile(String templateFile) {
         this.templateFile = templateFile;
-    }
-
-    public String getLangage() {
-        return langage;
-    }
-
-    public void setLangage(String langage) {
-        this.langage = langage;
     }
 
 }

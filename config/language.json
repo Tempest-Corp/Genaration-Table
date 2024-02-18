@@ -1,0 +1,48 @@
+[
+  {
+    "name": "java",
+    "types": {
+      "VARCHAR": "String",
+      "NUMERIC": "Double",
+      "SERIAL": "Integer",
+      "BOOL": "Boolean",
+      "TIMESTAMP": "String",
+      "INT4": "Integer"
+    },
+    "packageSyntax": {
+      "variable": "package",
+      "start": ";",
+      "end": "",
+      "name": "com.(projectName)"
+    },
+    "import_var": "import",
+    "model": {
+      "import": ["java.utils.TimeStamp"]
+    },
+    "controller": {},
+    "view": {},
+    "func_get_set": true
+  },
+  {
+    "name": "cs",
+    "types": {
+      "VARCHAR": "string",
+      "NUMERIC": "double",
+      "SERIAL": "int",
+      "BOOL": "Boolean",
+      "TIMESTAMP": "string",
+      "INT4": "int"
+    },
+    "packageSyntax": {
+      "variable": "package",
+      "start": ";",
+      "end": "",
+      "name": "com.[projectName]"
+    },
+    "import_var": "using",
+    "model": {},
+    "controller": {},
+    "view": {},
+    "func_get_set": false
+  }
+]
