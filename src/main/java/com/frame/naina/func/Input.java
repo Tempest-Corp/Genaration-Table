@@ -20,11 +20,11 @@ import com.frame.naina.utils.Transform;
 
 public class Input {
 
-    String databaseName = "naina_entity";
-    String databaseUsername = "postgres";
-    String password = "popo";
-    String packageName = "com.frame.naina.result";
-    String langage = "JAVA";
+    String databaseName;
+    String databaseUsername;
+    String password;
+    String packageName;
+    String langage;
     String pathFile = "./";
     String modelTemplate;
     List<String> imports = new ArrayList<String>();
@@ -49,26 +49,50 @@ public class Input {
 
     public void getConfigData() {
         try {
-            /// DATABASES
-            this.allDatabases = Transform.fromJson(Database[].class,
-                    Transform.getContent(LandMark.DATABASES_DATA));
-            this.database = this.allDatabases[0];
-            /// LANGUAGES
-            this.allLanguages = Transform.fromJson(Language[].class,
-                    Transform.getContent(LandMark.LANGUAGES_DATA));
-            this.language = this.allLanguages[0];
-            this.langage = this.language.getName().toUpperCase();
             /// SETUP
             this.setup = Transform.fromJson(Setup.class,
                     Transform.getContent(LandMark.SETUP_DATA));
+            System.out.println(this.setup.getLanguage());
             this.modelTemplate = this.setup.getTemplate().getModel();
+            /// DATABASES
+            this.allDatabases = Transform.fromJson(Database[].class,
+                    Transform.getContent(LandMark.DATABASES_DATA));
+            /// LANGUAGES
+            this.allLanguages = Transform.fromJson(Language[].class,
+                    Transform.getContent(LandMark.LANGUAGES_DATA));
+            getDefaults();
+
+            this.langage = this.language.getName().toUpperCase();
+            this.packageName = this.language.getPackageSyntax().get("name");
+
         } catch (Exception e) {
             System.out.println(e);
         }
     }
 
+    public void getDefaults() {
+
+        for (Database database : this.allDatabases) {
+            if (this.setup.getDatabaseConfig().equals(database.getId()))
+                this.database = database;
+        }
+        for (Language language : this.allLanguages) {
+            if (this.setup.getLanguage().equals(language.getName()))
+                this.language = language;
+        }
+        this.databaseName = this.database.getDatabaseName();
+        this.databaseUsername = this.database.getUsername();
+        this.password = this.database.getPassword();
+
+        for (String importDependance : this.language.getModel().getImports()) {
+            this.imports.add(importDependance);
+        }
+
+        // this.pathFile = this.pathFile + this.setup.getProjectName() + "/";
+    }
+
     public Boolean useDefaultValue(BufferedReader bufferedReader) throws IOException {
-        System.out.println("Use the default value from config files ? : (Y/n)  ");
+        System.out.print("Use the default value from config files ? : (Y/n)  ");
         bufferedReader = new BufferedReader(new InputStreamReader(System.in));
         return bufferedReader.readLine().toString().equalsIgnoreCase("Y");
     }

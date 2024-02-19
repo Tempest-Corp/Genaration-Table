@@ -6,22 +6,73 @@
       "NUMERIC": "Double",
       "SERIAL": "Integer",
       "BOOL": "Boolean",
-      "TIMESTAMP": "String",
+      "TIMESTAMP": "java.sql.Timestamp",
       "INT4": "Integer"
     },
     "packageSyntax": {
       "variable": "package",
       "start": ";",
       "end": "",
-      "name": "com.(projectName)"
+      "name": "com.test"
     },
     "import_var": "import",
+    "import_ending": ";",
+
     "model": {
-      "import": ["java.utils.TimeStamp"]
+      "classNameExtension": "",
+      "imports": [
+        "jakarta.persistence.Entity",
+        "jakarta.persistence.Column",
+        "jakarta.persistence.GeneratedValue",
+        "jakarta.persistence.GenerationType",
+        "jakarta.persistence.Id"
+      ],
+      "annotationsModule": ["@Entity(name = \"(tableName)\")", "@Table(name = \"(tableName)\")"],
+      "pkAnnotationModule": ["@Id", "@GeneratedValue(strategy = GenerationType.AUTO)"],
+      "pkType": "Long",
+      "fkAnnotationModule": ["@jakarta.persistence.ManyToOne", "@jakarta.persistence.JoinColumn(name = \"(fieldName)\")"],
+      "extendsModule": "",
+      "fieldEnding": ";",
+      "constructor": "\tpublic (ClassName) ((constructorParams)){\n (constructorInner) \t}",
+      "getters": "\tpublic (TypeTemplate) get(fieldNameMaj)() {\n\t\treturn  this.(fieldName) ;\n\t}\n",
+      "setters": "\tpublic (TypeTemplate) set(fieldNameMaj)((TypeTemplate) (fieldName)) {\n\t\tthis.(fieldName) = (fieldName) ;\n\t}\n"
     },
-    "controller": {},
-    "view": {},
-    "func_get_set": true
+    "repository": {
+      "classNameExtension": "Repository",
+      "imports": ["jakarta.persistence.Entity", "jakarta.persistence.Column"],
+      "annotationsModule": ["@Repository(name=\"(tableName)\")"],
+      "pkAnnotationModule": [],
+      "pkType": "",
+      "fkAnnotationModule": [],
+      "extendsModule": "",
+      "fieldEnding": ";",
+      "constructor": "",
+      "getters": "",
+      "setters": ""
+    },
+    "controller": {
+      "classNameExtension": "Controller",
+
+      "imports": [
+        "org.springframework.web.bind.annotation.GetMapping",
+        "org.springframework.web.bind.annotation.RequestMapping",
+        "org.springframework.web.bind.annotation.RestController",
+        "org.springframework.web.bind.annotation.PostMapping",
+        "org.springframework.web.bind.annotation.RequestBody",
+        "org.springframework.web.bind.annotation.PutMapping",
+        "org.springframework.web.bind.annotation.DeleteMapping"
+      ],
+      "annotationsModule": ["@RestController", "@RequestMapping(\"/(ClassName)\")"],
+      "pkAnnotationModule": [],
+      "pkType": "",
+      "fkAnnotationModule": [],
+      "extendsModule": "",
+      "fieldEnding": ";",
+      "constructor": "",
+      "getters": "",
+      "setters": ""
+    },
+    "view": {}
   },
   {
     "name": "cs",
@@ -34,15 +85,27 @@
       "INT4": "int"
     },
     "packageSyntax": {
-      "variable": "package",
-      "start": ";",
-      "end": "",
-      "name": "com.[projectName]"
+      "variable": "namespace",
+      "start": " {",
+      "end": "}",
+      "name": "com.test"
     },
     "import_var": "using",
-    "model": {},
+    "import_ending": ";",
+    "model": {
+      "imports": ["wnddd.utils.dsds"],
+      "extendsModule": "",
+      "annotationsModule": [],
+      "pkAnnotationModule": [],
+      "pkType": "Long",
+      "fkAnnotationModule": [],
+      "fieldEnding": " { get; set; }",
+      "constructor": "\tpublic (ClassName) ((constructorParams)){\n (constructorInner) \t}",
+      "getters": "\r",
+      "setters": "\r"
+    },
+    "repository": {},
     "controller": {},
-    "view": {},
-    "func_get_set": false
+    "view": {}
   }
 ]

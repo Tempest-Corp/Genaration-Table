@@ -5,7 +5,7 @@
     "driver": "org.postgresql.Driver",
     "port": "5432",
     "host": "localhost",
-    "user:name": "postgres",
+    "username": "postgres",
     "password": "popo",
     "databaseName": "naina_entity"
   },

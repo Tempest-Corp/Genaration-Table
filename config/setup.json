@@ -1,10 +1,11 @@
 {
   "projectName": "TestNaina",
   "language": "java",
+  "databaseConfig": 1,
   "template": {
-    "model": "templateClass/Class.templ",
-    "controller": "",
+    "model": "templateClass/Model.templ",
+    "repository": "templateClass/Repository.templ",
+    "controller": "templateClass/Controller.templ",
     "view": ""
-  },
-  "databaseConfig": 1
+  }
 }

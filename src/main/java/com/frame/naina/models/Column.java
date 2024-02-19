@@ -16,6 +16,8 @@ public class Column {
 
     Boolean isFK;
 
+    Boolean isPK;
+
     String FK_ref_table;
 
     Language configClass;
@@ -29,21 +31,51 @@ public class Column {
     }
 
     public String getters() {
-        return "\tpublic " + getTypeTemplate() + " get" + toCamelCase(this.name) + "() {\n" +
-                "\t\treturn " + "this." + this.name + ";\n" +
-                "\t}\n";
+        // return "\tpublic " + getTypeTemplate() + " get" + toCamelCase(this.name) +
+        // "() {\n" +
+        // "\t\treturn " + "this." + this.name + ";\n" +
+        // "\t}\n";
+        return this.replaceAll(this.configClass.getModule().getGetters());
+
     }
 
     public String setters() {
-        return "\tpublic void set" + toCamelCase(this.name) +
-                "(" + getTypeTemplate() + " " + this.name + ") " +
-                "{\n" +
-                "\t\tthis." + this.name + " = " + this.name + ";\n" +
-                "\t}\n";
+        // return "\tpublic void set" + toCamelCase(this.name) +
+        // "(" + getTypeTemplate() + " " + this.name + ") " +
+        // "{\n" +
+        // "\t\tthis." + this.name + " = " + this.name + ";\n" +
+        // "\t}\n";
+        return this.replaceAll(this.configClass.getModule().getSetters());
+    }
+
+    public String getPkAnnotation() {
+        String annotations = "";
+        for (String annotation : this.configClass.getModule().getPkAnnotationModule()) {
+            annotations += "\t" + annotation + "\n";
+        }
+        return annotations;
+    }
+
+    public String getFkAnnotation() {
+        String annotations = "";
+        for (String annotation : this.configClass.getModule().getFkAnnotationModule()) {
+            annotations += "\t" + annotation + "\n";
+        }
+        annotations = replaceAll(annotations);
+        return annotations;
+    }
+
+    public String replaceAll(String line) {
+        line = line.replace("(TypeTemplate)", getTypeTemplate());
+        line = line.replace("(fieldNameMaj)", toCamelCase(this.name));
+        line = line.replace("(fieldName)", this.name);
+        return line;
     }
 
     public String getTypeTemplate() {
         this.type = this.type.toUpperCase();
+        if (isPK)
+            return configClass.getModule().getPkType();
         return isFK ? getFKTypeTemplate() : this.configClass.getTypes().get(this.type);
     }
 
@@ -83,8 +115,18 @@ public class Column {
             this.isFK = false;
     }
 
+    public String transformFirstLetterToLowerCase(String text) {
+        if (text == null || text.isEmpty()) {
+            return text;
+        }
+        return Character.toLowerCase(text.charAt(0)) + text.substring(1);
+    }
+
     public String getName() {
-        return name;
+        if (isFK)
+            return transformFirstLetterToLowerCase(toCamelCase(FK_ref_table));
+        else
+            return name;
     }
 
     public void setName(String name) {
@@ -97,6 +139,14 @@ public class Column {
 
     public void setType(String type) {
         this.type = type;
+    }
+
+    public Boolean getIsPK() {
+        return isPK;
+    }
+
+    public void setIsPK(Boolean isPK) {
+        this.isPK = isPK;
     }
 
     public Boolean getIsNullable() {

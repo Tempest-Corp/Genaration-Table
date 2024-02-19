@@ -2,6 +2,7 @@ package com.frame.naina.Data;
 
 public class Database {
 
+    Integer id;
     String name;
     String driver;
     Integer port;
@@ -70,5 +71,13 @@ public class Database {
     public String toString() {
         return "Database [name=" + name + ", driver=" + driver + ", port=" + port + ", username=" + username
                 + ", password=" + password + "]";
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
     }
 }

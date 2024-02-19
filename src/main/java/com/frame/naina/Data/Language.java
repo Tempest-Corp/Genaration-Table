@@ -12,10 +12,13 @@ public class Language {
     HashMap<String, String> types;
     HashMap<String, String> packageSyntax;
     String import_var;
+    String import_ending;
+    Module module;
+    ///
     Model model;
     Controller controller;
     View view;
-    Boolean func_get_set;
+    Respository repository;
 
     public static Language getLangageConfig(String langage) throws FileNotFoundException {
         String filePath = LandMark.LANGUAGES_DATA;
@@ -52,20 +55,28 @@ public class Language {
         this.import_var = import_var;
     }
 
-    public Boolean getFunc_get_set() {
-        return func_get_set;
-    }
-
-    public void setFunc_get_set(Boolean func_get_set) {
-        this.func_get_set = func_get_set;
-    }
-
     public Model getModel() {
         return model;
     }
 
+    public Module getModule() {
+        return module;
+    }
+
+    public void setModule(Module module) {
+        this.module = module;
+    }
+
     public void setModel(Model model) {
         this.model = model;
+    }
+
+    public Respository getRepository() {
+        return repository;
+    }
+
+    public void setRepository(Respository repository) {
+        this.repository = repository;
     }
 
     public String getName() {
@@ -90,6 +101,21 @@ public class Language {
 
     public void setView(View view) {
         this.view = view;
+    }
+
+    public String getImport_ending() {
+        return import_ending;
+    }
+
+    public void setImport_ending(String import_ending) {
+        this.import_ending = import_ending;
+    }
+
+    @Override
+    public String toString() {
+        return "Language [name=" + name + ", types=" + types + ", packageSyntax=" + packageSyntax + ", import_var="
+                + import_var + ", import_ending=" + import_ending + ", model=" + model + ", controller=" + controller
+                + ", view=" + view + "]";
     }
 
 }

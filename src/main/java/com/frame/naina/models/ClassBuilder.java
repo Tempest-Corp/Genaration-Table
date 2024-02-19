@@ -1,6 +1,7 @@
 package com.frame.naina.models;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -17,11 +18,11 @@ public class ClassBuilder {
 
     String className;
 
+    String tableName;
+
     List<Column> columns = new Vector<Column>();
 
-    String template = "JAVA";
-
-    String packageName = "com.frame.naina.Result";
+    String packageName;
 
     List<String> imports = new Vector<String>();
 
@@ -29,20 +30,34 @@ public class ClassBuilder {
 
     Language language;
 
-    // Mila importation automatic raha ohatra ka mila anleh izy Timestamp ohatra ,
-    // java.sql.Timestamp;
+    String context; // model,controller,repository,view
 
     public ClassBuilder(String className) {
         this.className = className;
+        this.tableName = className;
     }
 
-    public void build(String filePath) {
+    public void build(String filePath, String context) {
 
         toCamelCaseClassName();
+        addContext(context);
         String contentFile = buildContentFile(readFile(this.templateFile));
-        String file = this.className + "." + this.template.toLowerCase();
+        String file = this.className + "." + this.language.getName().toLowerCase();
         writeFile(file,
                 contentFile, filePath);
+        removeContext(context);
+    }
+
+    public void addContext(String context) {
+        this.context = context;
+        this.packageName += "." + context;
+        addExtensionClassName();
+    }
+
+    public void removeContext(String context) {
+        this.context = "";
+        this.packageName = this.packageName.replace("." + context, "");
+        removeExtensionClassName();
     }
 
     public void writeFile(String file, String content, String pathFiles) {
@@ -53,11 +68,21 @@ public class ClassBuilder {
             createFolder(pathPackageName);
 
             Path filePath = Path.of(pathPackageName + "/" + file);
+            emptyFile(filePath.toAbsolutePath().toString());
 
             Files.writeString(filePath, content, StandardCharsets.UTF_8, StandardOpenOption.CREATE,
                     StandardOpenOption.WRITE);
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    public void emptyFile(String filePath) {
+        try {
+            FileWriter fileWriter = new FileWriter(filePath);
+            fileWriter.close(); // This will truncate the file
+        } catch (IOException e) {
+            System.err.println(e);
         }
     }
 
@@ -99,17 +124,17 @@ public class ClassBuilder {
         for (String line : linesTemplate) {
             content += inspectLine(line);
         }
-        content += "\n" + this.language.getPackageSyntax().get("start");
+        content += "\n";
+        content = replaceAll(content);
         return content;
     }
 
-    public String inspectExtensionClassName(String line) {
-        if (line.contains("$ext_cn=")) {
-            String[] parts = line.split("=");
-            this.className = this.className + parts[1];
-            line = "\r";
-        }
-        return line;
+    public void addExtensionClassName() {
+        this.className = this.className + this.language.getModule().getClassNameExtension();
+    }
+
+    public void removeExtensionClassName() {
+        this.className = this.className.replace(this.language.getModule().getClassNameExtension(), "");
     }
 
     public String inspectLine(String line) {
@@ -120,14 +145,27 @@ public class ClassBuilder {
 
     public String switchWord(String line) {
         line = jumpDown(attributs(
-                setters(getters(constructor(ClassName(imports(inspectExtensionClassName(packageName(line)))))))));
+                setters(getters(constructor(ClassName(imports((packageName(line)))))))));
+        line = classAnnotations(line);
+        return line;
+    }
+
+    public String classAnnotations(String line) {
+        String classAnnotations = "";
+        if (line.contains("(classAnnotations)")) {
+            int index = 0;
+            for (String annotation : this.language.getModule().getAnnotationsModule()) {
+                classAnnotations += annotation
+                        + (index != this.language.getModule().getAnnotationsModule().length - 1 ? "\n" : "\n");
+                index++;
+            }
+        }
+        line = line.replace("(classAnnotations)", classAnnotations);
         return line;
     }
 
     public String setters(String line) {
         String setters = "";
-        if (!this.language.getFunc_get_set())
-            return line.replace("(setters)", "\n");
 
         if (line.contains("(setters)")) {
             for (Column column : columns) {
@@ -140,9 +178,6 @@ public class ClassBuilder {
 
     public String getters(String line) {
         String getters = "";
-
-        if (!this.language.getFunc_get_set())
-            return line.replace("(getters)", "\n");
 
         if (line.contains("(getters)")) {
             for (Column column : columns) {
@@ -158,7 +193,7 @@ public class ClassBuilder {
         if (line.contains("(imports)")) {
             for (String importRow : this.imports) {
                 importsLines += this.language.getImport_var() + " " + importRow
-                        + this.language.getPackageSyntax().get("end")
+                        + this.language.getImport_ending()
                         + "\n";
             }
         }
@@ -170,7 +205,12 @@ public class ClassBuilder {
         String importsLines = "";
         if (line.contains("(attributs)")) {
             for (Column column : this.columns) {
-                importsLines += "\t " + column.getTypeTemplate() + " " + column.getName() + getSet(line) + "\n";
+                if (column.isPK)
+                    importsLines += column.getPkAnnotation();
+                else if (column.isFK)
+                    importsLines += column.getFkAnnotation();
+                importsLines += "\t" + column.getTypeTemplate() + " " + column.getName() + getFieldEnding(line)
+                        + "\n\n";
             }
             line = line.replace("(attributs)", importsLines);
         }
@@ -178,24 +218,27 @@ public class ClassBuilder {
         return line;
     }
 
-    public String getSet(String line) {
-        if (line.contains(":get:set") && !this.language.getFunc_get_set()) {
-            return " { get; set; } ";
-        } else
-            return this.language.getPackageSyntax().get("end");
+    public String getFieldEnding(String line) {
+        return this.language.getModule().getFieldEnding();
     }
 
     public String packageName(String line) {
-        String package_tag = "(package__name)";
-        String package_var = "(package__var)";
+        String package_tag = "(package_name)";
+        String package_var = "(package_var)";
+        // String package_start = "(package_start)";
+        // String package_end = "(package_end)";
+        //
+        String extendss = "(extends)";
+
         String[] parts = line.split(" ");
         for (String part : parts) {
             if (part.trim().equals(package_tag)) {
-                line = line.replace(package_tag, this.packageName) + this.language.getPackageSyntax().get("start");
+                line = line.replace(package_tag, this.packageName);
             } else if (part.trim().equals(package_var)) {
                 line = line.replace(package_var, this.language.getPackageSyntax().get("variable")) + " ";
             }
         }
+        line = line.replace(extendss, this.language.getModule().getExtendsModule());
         return line;
     }
 
@@ -246,10 +289,10 @@ public class ClassBuilder {
     public String constructor(String line) {
         String constLines = "";
         if (line.contains("(constructor)")) {
-
-            constLines += "\tpublic " + getClassName() + "(" + constructorParams() + "){\n"
-                    + constructorInner() +
-                    "\t}";
+            constLines += language.getModule().getConstructor();
+            constLines = constLines.replace("(ClassName)", getClassName());
+            constLines = constLines.replace("(constructorParams)", constructorParams());
+            constLines = constLines.replace("(constructorInner)", constructorInner());
             line = line.replace("(constructor)", constLines);
         }
 
@@ -274,6 +317,27 @@ public class ClassBuilder {
         return params;
     }
 
+    public String replaceAll(String content) {
+        String package_tag = "(package_name)";
+        String package_start = "(package_start)";
+        String package_end = "(package_end)";
+        String tableName = "(tableName)";
+        String extendss = "(extends)";
+        String className = "(ClassName)";
+        String class_name = "(class_name)";
+
+        content = content.replace(package_tag, this.packageName);
+        content = content.replace(package_start, this.language.getPackageSyntax().get("start").toString());
+        content = content.replace(package_end, this.language.getPackageSyntax().get("end").toString());
+        content = content.replace(extendss, this.language.getModule().getExtendsModule());
+        content = content.replace(className,
+                this.className.replace(this.language.getModule().getClassNameExtension(), ""));
+        content = content.replace(class_name,
+                this.className.replace(this.language.getModule().getClassNameExtension(), ""));
+        content = content.replace(tableName, this.tableName);
+        return content;
+    }
+
     public void setlanguage(Language language) {
         this.language = language;
     }
@@ -288,14 +352,6 @@ public class ClassBuilder {
 
     public List<Column> getColumns() {
         return columns;
-    }
-
-    public String getTemplate() {
-        return template;
-    }
-
-    public void setTemplate(String template) {
-        this.template = template;
     }
 
     public String getPackageName() {
@@ -318,10 +374,26 @@ public class ClassBuilder {
         this.columns = columns;
     }
 
+    public String getTableName() {
+        return tableName;
+    }
+
+    public void setTableName(String tableName) {
+        this.tableName = tableName;
+    }
+
+    public Language getLanguage() {
+        return language;
+    }
+
+    public void setLanguage(Language language) {
+        this.language = language;
+    }
+
     @Override
     public String toString() {
-        return "ClassBuilder [className=" + className + ", columns=" + columns + ", template=" + template
-                + ", packageName=" + packageName + ", imports=" + imports + ", templateFile=" + templateFile + "]";
+        return "ClassBuilder [className=" + className + ", columns=" + columns +
+                ", packageName=" + packageName + ", imports=" + imports + ", templateFile=" + templateFile + "]";
     }
 
     public String getTemplateFile() {
