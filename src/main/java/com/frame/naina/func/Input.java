@@ -52,7 +52,7 @@ public class Input {
             /// SETUP
             this.setup = Transform.fromJson(Setup.class,
                     Transform.getContent(LandMark.SETUP_DATA));
-            System.out.println(this.setup.getLanguage());
+
             this.modelTemplate = this.setup.getTemplate().getModel();
             /// DATABASES
             this.allDatabases = Transform.fromJson(Database[].class,
@@ -73,8 +73,11 @@ public class Input {
     public void getDefaults() {
 
         for (Database database : this.allDatabases) {
-            if (this.setup.getDatabaseConfig().equals(database.getId()))
+            if (this.setup.getDatabaseConfig().equals(database.getId())) {
                 this.database = database;
+                this.setup.setDatabase(database);
+            }
+
         }
         for (Language language : this.allLanguages) {
             if (this.setup.getLanguage().equals(language.getName()))
@@ -104,11 +107,13 @@ public class Input {
         bufferedReader = new BufferedReader(new InputStreamReader(System.in));
         String name = bufferedReader.readLine();
         this.databaseName = empty(name) ? this.databaseName : name;
+        this.database.setDatabaseName(this.databaseName);
 
         System.out.print("Username [" + this.database.getUsername() + "] : ");
         bufferedReader = new BufferedReader(new InputStreamReader(System.in));
         String username = bufferedReader.readLine();
         this.databaseUsername = empty(username) ? this.databaseUsername : username;
+        this.database.setUsername(username);
 
         handlePassword();
     }
@@ -119,6 +124,8 @@ public class Input {
             char[] passwordArray = console.readPassword("password [" + this.getDatabase().getPassword() + "] : ");
             String password = new String(passwordArray);
             this.password = empty(password) ? this.password : password;
+            this.database.setPassword(password);
+
             java.util.Arrays.fill(passwordArray, ' ');
         }
         System.out.println("");
@@ -146,6 +153,7 @@ public class Input {
                     System.out.println("=> Invalid choice\n");
             }
         }
+
         System.out.println("");
     }
 

@@ -1,11 +1,12 @@
 {
-  "projectName": "TestNaina",
+  "projectName": "Blob",
   "language": "java",
   "databaseConfig": 1,
   "template": {
     "model": "templateClass/Model.templ",
     "repository": "templateClass/Repository.templ",
     "controller": "templateClass/Controller.templ",
-    "view": ""
+    "view": "",
+    "properties": "templateClass/properties.templ"
   }
 }

@@ -2,7 +2,7 @@ package com.frame.naina.Data;
 
 public class Template {
 
-    public String model, controller, view, repository;
+    public String model, controller, view, repository, properties;
 
     public String getModel() {
         return model;
@@ -39,6 +39,14 @@ public class Template {
 
     public void setRepository(String repository) {
         this.repository = repository;
+    }
+
+    public String getProperties() {
+        return properties;
+    }
+
+    public void setProperties(String properties) {
+        this.properties = properties;
     }
 
 }

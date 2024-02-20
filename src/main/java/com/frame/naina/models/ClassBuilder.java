@@ -13,6 +13,7 @@ import java.util.Vector;
 import org.springframework.util.ResourceUtils;
 
 import com.frame.naina.Data.Language;
+import com.frame.naina.Data.Method;
 
 public class ClassBuilder {
 
@@ -21,6 +22,8 @@ public class ClassBuilder {
     String tableName;
 
     List<Column> columns = new Vector<Column>();
+
+    List<Column> columnsModels = new Vector<Column>();
 
     String packageName;
 
@@ -80,7 +83,7 @@ public class ClassBuilder {
     public void emptyFile(String filePath) {
         try {
             FileWriter fileWriter = new FileWriter(filePath);
-            fileWriter.close(); // This will truncate the file
+            fileWriter.close();
         } catch (IOException e) {
             System.err.println(e);
         }
@@ -124,6 +127,8 @@ public class ClassBuilder {
         for (String line : linesTemplate) {
             content += inspectLine(line);
         }
+        content = controllerAttributs(content);
+        content = methods(content);
         content += "\n";
         content = replaceAll(content);
         return content;
@@ -201,18 +206,61 @@ public class ClassBuilder {
         return line;
     }
 
+    public String methods(String line) {
+        String endpoints = "";
+        try {
+            if (line.contains("(methods)")) {
+                for (Method method : this.getLanguage().getModule().getMethods()) {
+                    endpoints += method.getAnnotationsList(this);
+                    endpoints += method.getStruture(this) + "\n";
+                }
+            }
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+        line = line.replace("(methods)", endpoints);
+        return line;
+    }
+
+    public String controllerAttributs(String line) {
+        String attributsLines = "";
+        if (line.contains("(dependenciesRepository)")) {
+            attributsLines += Column.arrayToLines(this.language.getModule().getFieldAnnotationModule());
+            attributsLines += "\t" + this.getLanguage().getModule().getFieldEncapsulation()
+                    + getRepositoryType() + " "
+                    + Column.minFirst(getOnlyClassName())
+                    + this.language.getRepository().getClassNameExtension() + getFieldEnding(line)
+                    + "\n\n";
+        }
+        line = line.replace("(dependenciesRepository)", attributsLines);
+        return line;
+    }
+
+    public String getRepositoryType() {
+        return this.packageName.replace("." + context, "") + "." + this.language.getRepository().getContext() + "."
+                + getOnlyClassName()
+                + this.language.getRepository().getClassNameExtension();
+    }
+
+    public String getOnlyClassName() {
+        return this.className.replace(this.getLanguage().getModule().getClassNameExtension(), "");
+    }
+
     public String attributs(String line) {
-        String importsLines = "";
+        String attributsLines = "";
         if (line.contains("(attributs)")) {
             for (Column column : this.columns) {
                 if (column.isPK)
-                    importsLines += column.getPkAnnotation();
+                    attributsLines += column.getPkAnnotation();
                 else if (column.isFK)
-                    importsLines += column.getFkAnnotation();
-                importsLines += "\t" + column.getTypeTemplate() + " " + column.getName() + getFieldEnding(line)
+                    attributsLines += column.getFkAnnotation();
+                else
+                    attributsLines += column.getFieldAnnotation();
+                attributsLines += "\t" + column.getConfigClass().getModule().getFieldEncapsulation()
+                        + column.getTypeTemplate() + " " + column.getName() + getFieldEnding(line)
                         + "\n\n";
             }
-            line = line.replace("(attributs)", importsLines);
+            line = line.replace("(attributs)", attributsLines);
         }
 
         return line;
@@ -289,10 +337,18 @@ public class ClassBuilder {
     public String constructor(String line) {
         String constLines = "";
         if (line.contains("(constructor)")) {
+
+            //
             constLines += language.getModule().getConstructor();
             constLines = constLines.replace("(ClassName)", getClassName());
             constLines = constLines.replace("(constructorParams)", constructorParams());
             constLines = constLines.replace("(constructorInner)", constructorInner());
+            constLines += "\n\n";
+            constLines += language.getModule().getConstructor();
+            constLines = constLines.replace("(ClassName)", getClassName());
+            constLines = constLines.replace("(constructorParams)", "");
+            constLines = constLines.replace("(constructorInner)", "");
+
             line = line.replace("(constructor)", constLines);
         }
 
@@ -317,23 +373,65 @@ public class ClassBuilder {
         return params;
     }
 
+    public String getPkName() {
+        for (Column column : this.columnsModels) {
+            if (column.isPK)
+                return column.getName();
+        }
+        return "";
+    }
+
     public String replaceAll(String content) {
         String package_tag = "(package_name)";
+        String package_name_only = "(package_name_only)";
         String package_start = "(package_start)";
         String package_end = "(package_end)";
         String tableName = "(tableName)";
         String extendss = "(extends)";
         String className = "(ClassName)";
         String class_name = "(class_name)";
+        String ClassNameMin = "(ClassNameMin)";
+        String ClassNameOnly = "(ClassNameOnly)";
+        String class_name_min = "(class_name_min)";
+        String class_name_only = "(class_name_only)";
+        String pkType = "(pkType)";
+        String pkField = "(pkField)";
+        String RepositoryClass = "(RepositoryClass)";
+        String responseHandlerContext = "(responseHandlerContext)";
+        String responseHandlerName = "(responseHandlerName)";
 
+        String modelContext = "(modelContext)";
+        String controllerContext = "(controllerContext)";
+        String repositoryContext = "(repositoryContext)";
+
+        content = content.replace(responseHandlerContext, this.language.getResponseHandler().getContext());
+        content = content.replace(modelContext, this.language.getModel().getContext());
+        content = content.replace(controllerContext, this.language.getController().getContext());
+        content = content.replace(repositoryContext, this.language.getRepository().getContext());
+
+        content = content.replace(responseHandlerName, toCamelCase(this.language.getResponseHandler().getName()));
+        content = content.replace(RepositoryClass, Column.minFirst(getOnlyClassName())
+                + this.language.getRepository().getClassNameExtension());
+        content = content.replace(pkType, this.language.getModel().getPkType());
+        content = content.replace(pkField, this.getPkName());
         content = content.replace(package_tag, this.packageName);
+        content = content.replace(package_name_only,
+                this.packageName.replace("." + this.language.getModule().getContext(), ""));
         content = content.replace(package_start, this.language.getPackageSyntax().get("start").toString());
         content = content.replace(package_end, this.language.getPackageSyntax().get("end").toString());
         content = content.replace(extendss, this.language.getModule().getExtendsModule());
+        content = content.replace(class_name_only,
+                this.className.replace(this.language.getModule().getClassNameExtension(), ""));
+        content = content.replace(ClassNameOnly,
+                this.className.replace(this.language.getModule().getClassNameExtension(), ""));
         content = content.replace(className,
                 this.className.replace(this.language.getModule().getClassNameExtension(), ""));
         content = content.replace(class_name,
                 this.className.replace(this.language.getModule().getClassNameExtension(), ""));
+        content = content.replace(ClassNameMin,
+                Column.minFirst(this.className.replace(this.language.getModule().getClassNameExtension(), "")));
+        content = content.replace(class_name_min,
+                Column.minFirst(this.className.replace(this.language.getModule().getClassNameExtension(), "")));
         content = content.replace(tableName, this.tableName);
         return content;
     }
@@ -376,6 +474,22 @@ public class ClassBuilder {
 
     public String getTableName() {
         return tableName;
+    }
+
+    public List<Column> getColumnsModels() {
+        return columnsModels;
+    }
+
+    public void setColumnsModels(List<Column> columnsModels) {
+        this.columnsModels = columnsModels;
+    }
+
+    public String getContext() {
+        return context;
+    }
+
+    public void setContext(String context) {
+        this.context = context;
     }
 
     public void setTableName(String tableName) {

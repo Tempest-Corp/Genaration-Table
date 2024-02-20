@@ -65,10 +65,25 @@ public class Column {
         return annotations;
     }
 
+    public String getFieldAnnotation() {
+        String annotations = "";
+        for (String annotation : this.configClass.getModule().getFieldAnnotationModule()) {
+            annotations += "\t" + annotation + "\n";
+        }
+        annotations = replaceAll(annotations);
+        return annotations;
+    }
+
     public String replaceAll(String line) {
-        line = line.replace("(TypeTemplate)", getTypeTemplate());
-        line = line.replace("(fieldNameMaj)", toCamelCase(this.name));
-        line = line.replace("(fieldName)", this.name);
+        if (isFK) {
+            line = line.replace("(fieldName)", this.getName());
+            line = line.replace("(fieldNameMaj)", toCamelCase(this.getName()));
+        }
+        line = line.replace("(fieldName_only)", this.name);
+        line = line.replace("(TypeTemplate)", getTypeTemplate() + "");
+        line = line.replace("(fieldNameMaj)", toCamelCase(this.name) + "");
+        line = line.replace("(fieldName)", this.name + "");
+
         return line;
     }
 
@@ -84,7 +99,15 @@ public class Column {
         return typeTemplate;
     }
 
-    public String toCamelCase(String text) {
+    public static String arrayToLines(String[] array) {
+        String annotations = "";
+        for (String annotation : array) {
+            annotations += "\t" + annotation + "\n";
+        }
+        return annotations;
+    }
+
+    public static String toCamelCase(String text) {
         String textCamelCase = "";
         if (text.length() > 0 && text != null) {
             Boolean upperCase = true;
@@ -100,7 +123,7 @@ public class Column {
         return textCamelCase;
     }
 
-    public Boolean isNotCorrectCharacter(char character) {
+    public static Boolean isNotCorrectCharacter(char character) {
         if (character == '_')
             return true;
         else
@@ -120,6 +143,20 @@ public class Column {
             return text;
         }
         return Character.toLowerCase(text.charAt(0)) + text.substring(1);
+    }
+
+    public static String minFirst(String text) {
+        if (text == null || text.isEmpty()) {
+            return text;
+        }
+        return Character.toLowerCase(text.charAt(0)) + text.substring(1);
+    }
+
+    public static String CamelCase(String text) {
+        if (text == null || text.isEmpty()) {
+            return text;
+        }
+        return toCamelCase(text);
     }
 
     public String getName() {

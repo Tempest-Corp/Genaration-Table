@@ -7,52 +7,81 @@
       "SERIAL": "Integer",
       "BOOL": "Boolean",
       "TIMESTAMP": "java.sql.Timestamp",
-      "INT4": "Integer"
+      "INT4": "Integer",
+      "INT8": "Double",
+      "BIGSERIAL": "Double",
+      "FLOAT8": "Double",
+      "OBJECT": "Object",
+      "STRING": "String"
     },
     "packageSyntax": {
       "variable": "package",
       "start": ";",
       "end": "",
-      "name": "com.test"
+      "name": "com.main"
     },
     "import_var": "import",
     "import_ending": ";",
-
+    "responseHandler": {
+      "imports": [],
+      "name": "Status",
+      "templatePath": "templateClass/response/Response.templ",
+      "fields": ["String status", "String message", "Object data"],
+      "fieldEncapsulation": "public ",
+      "annotationsModule": [],
+      "fieldAnnotationModule": [],
+      "context": "utils"
+    },
     "model": {
+      "context": "models",
       "classNameExtension": "",
       "imports": [
         "jakarta.persistence.Entity",
         "jakarta.persistence.Column",
         "jakarta.persistence.GeneratedValue",
         "jakarta.persistence.GenerationType",
-        "jakarta.persistence.Id"
+        "jakarta.persistence.Id",
+        "jakarta.persistence.Table"
       ],
       "annotationsModule": ["@Entity(name = \"(tableName)\")", "@Table(name = \"(tableName)\")"],
       "pkAnnotationModule": ["@Id", "@GeneratedValue(strategy = GenerationType.AUTO)"],
       "pkType": "Long",
-      "fkAnnotationModule": ["@jakarta.persistence.ManyToOne", "@jakarta.persistence.JoinColumn(name = \"(fieldName)\")"],
+      "fieldEncapsulation": "public ",
+      "fkAnnotationModule": [
+        "@jakarta.persistence.ManyToOne",
+        "@jakarta.persistence.JoinColumn(name = \"(fieldName_only)\")"
+      ],
+      "fieldAnnotationModule": ["@Column"],
       "extendsModule": "",
       "fieldEnding": ";",
       "constructor": "\tpublic (ClassName) ((constructorParams)){\n (constructorInner) \t}",
-      "getters": "\tpublic (TypeTemplate) get(fieldNameMaj)() {\n\t\treturn  this.(fieldName) ;\n\t}\n",
-      "setters": "\tpublic (TypeTemplate) set(fieldNameMaj)((TypeTemplate) (fieldName)) {\n\t\tthis.(fieldName) = (fieldName) ;\n\t}\n"
+      "getters": "\tpublic (TypeTemplate) get(fieldNameMaj)() {\n\t\treturn this.(fieldName) ;\n\t}\n",
+      "setters": "\tpublic void set(fieldNameMaj)((TypeTemplate) (fieldName)) {\n\t\tthis.(fieldName) = (fieldName) ;\n\t}\n",
+      "methods": []
     },
     "repository": {
+      "context": "repository",
       "classNameExtension": "Repository",
-      "imports": ["jakarta.persistence.Entity", "jakarta.persistence.Column"],
+      "imports": [
+        "(package_name_only).(modelContext).(class_name_only)",
+        "org.springframework.data.jpa.repository.JpaRepository"
+      ],
       "annotationsModule": ["@Repository(name=\"(tableName)\")"],
       "pkAnnotationModule": [],
       "pkType": "",
       "fkAnnotationModule": [],
+      "fieldAnnotationModule": [],
+      "fieldEncapsulation": "public ",
       "extendsModule": "",
       "fieldEnding": ";",
       "constructor": "",
       "getters": "",
-      "setters": ""
+      "setters": "",
+      "methods": []
     },
     "controller": {
+      "context": "controllers",
       "classNameExtension": "Controller",
-
       "imports": [
         "org.springframework.web.bind.annotation.GetMapping",
         "org.springframework.web.bind.annotation.RequestMapping",
@@ -60,17 +89,47 @@
         "org.springframework.web.bind.annotation.PostMapping",
         "org.springframework.web.bind.annotation.RequestBody",
         "org.springframework.web.bind.annotation.PutMapping",
-        "org.springframework.web.bind.annotation.DeleteMapping"
+        "org.springframework.web.bind.annotation.DeleteMapping",
+        "org.springframework.web.bind.annotation.ExceptionHandler",
+        "org.springframework.beans.factory.annotation.Autowired",
+        "java.util.List",
+        "(package_name_only).(responseHandlerContext).(responseHandlerName)",
+        "(package_name_only).(modelContext).(class_name_only)"
       ],
-      "annotationsModule": ["@RestController", "@RequestMapping(\"/(ClassName)\")"],
+      "annotationsModule": ["@RestController", "@RequestMapping(\"/(ClassNameMin)\")"],
       "pkAnnotationModule": [],
       "pkType": "",
       "fkAnnotationModule": [],
+
+      "fieldAnnotationModule": ["@Autowired"],
+      "fieldEncapsulation": "private ",
       "extendsModule": "",
       "fieldEnding": ";",
       "constructor": "",
       "getters": "",
-      "setters": ""
+      "setters": "",
+      "methods": [
+        {
+          "annotations": ["@DeleteMapping(\"/{id}\")"],
+          "templatePath": "templateClass/controllers/deleteFunc.templ"
+        },
+        {
+          "annotations": ["@PostMapping"],
+          "templatePath": "templateClass/controllers/insertFunc.templ"
+        },
+        {
+          "annotations": ["@GetMapping"],
+          "templatePath": "templateClass/controllers/readFunc.templ"
+        },
+        {
+          "annotations": ["@PutMapping"],
+          "templatePath": "templateClass/controllers/updateFunc.templ"
+        },
+        {
+          "annotations": ["@ExceptionHandler(Exception.class)"],
+          "templatePath": "templateClass/controllers/exceptionHandler.templ"
+        }
+      ]
     },
     "view": {}
   },
@@ -92,6 +151,16 @@
     },
     "import_var": "using",
     "import_ending": ";",
+    "responseHandler": {
+      "imports": [],
+      "name": "Status",
+      "templatePath": "templateClass/response/Response.templ",
+      "fields": ["string status", "string message", "object data"],
+      "fieldEncapsulation": "public ",
+      "annotationsModule": [],
+      "fieldAnnotationModule": [],
+      "context": "utils"
+    },
     "model": {
       "imports": ["wnddd.utils.dsds"],
       "extendsModule": "",
@@ -99,6 +168,7 @@
       "pkAnnotationModule": [],
       "pkType": "Long",
       "fkAnnotationModule": [],
+      "fieldAnnotationModule": [""],
       "fieldEnding": " { get; set; }",
       "constructor": "\tpublic (ClassName) ((constructorParams)){\n (constructorInner) \t}",
       "getters": "\r",

@@ -2,6 +2,7 @@ package com.frame.naina.Data;
 
 public class Module {
 
+    String context;// Dossier misy an zareo
     String classNameExtension;
     String[] imports;
     String[] annotationsModule;
@@ -13,9 +14,20 @@ public class Module {
     String[] pkAnnotationModule;
     String pkType;
     String[] fkAnnotationModule;
+    String[] fieldAnnotationModule;
+    String fieldEncapsulation;
+    Method[] methods;
 
     public String[] getImports() {
         return imports;
+    }
+
+    public String getFieldEncapsulation() {
+        return fieldEncapsulation;
+    }
+
+    public void setFieldEncapsulation(String fieldEncapsulation) {
+        this.fieldEncapsulation = fieldEncapsulation;
     }
 
     public void setImports(String[] imports) {
@@ -100,6 +112,30 @@ public class Module {
 
     public void setClassNameExtension(String classNameExtension) {
         this.classNameExtension = classNameExtension;
+    }
+
+    public String[] getFieldAnnotationModule() {
+        return fieldAnnotationModule;
+    }
+
+    public void setFieldAnnotationModule(String[] fieldAnnotationModule) {
+        this.fieldAnnotationModule = fieldAnnotationModule;
+    }
+
+    public String getContext() {
+        return context;
+    }
+
+    public void setContext(String context) {
+        this.context = context;
+    }
+
+    public Method[] getMethods() {
+        return methods;
+    }
+
+    public void setMethods(Method[] methods) {
+        this.methods = methods;
     }
 
 }

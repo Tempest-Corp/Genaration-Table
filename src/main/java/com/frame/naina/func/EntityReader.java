@@ -1,6 +1,7 @@
 package com.frame.naina.func;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
@@ -10,11 +11,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
+import com.frame.naina.Data.LandMark;
 import com.frame.naina.Data.Language;
+import com.frame.naina.Data.Setup;
 import com.frame.naina.Data.Template;
 import com.frame.naina.connection.Connect;
 import com.frame.naina.models.ClassBuilder;
 import com.frame.naina.models.Column;
+import com.frame.naina.utils.Transform;
 
 public class EntityReader {
 
@@ -34,6 +38,10 @@ public class EntityReader {
 
     private Template template;
 
+    private Language language;
+
+    private Setup setup;
+
     public EntityReader(String database, String username, String password, Input input) {
         this.database = database;
         this.username = username;
@@ -41,9 +49,11 @@ public class EntityReader {
         addInputData(input);
     }
 
-    public void readTables() throws SQLException, FileNotFoundException {
+    public void readTables() throws SQLException, FileNotFoundException, IOException {
         Connection connect = Connect.getConnection(database, username, password);
+
         List<ClassBuilder> classes = getAllClassesSchemaBuilder(connect);
+        Transform.unzip(LandMark.STRUCT_DATA, this.setup.getProjectName());
 
         for (ClassBuilder classBuilder : classes) {
             classBuilder.setPackageName(this.packageName);
@@ -51,15 +61,35 @@ public class EntityReader {
             buildModel(classBuilder);
             buildRespository(classBuilder);
             buildController(classBuilder);
-
         }
+        if (this.language.getResponseHandler() != null)
+            this.language.getResponseHandler().build(this);
+
         connect.close();
+        moveFolderInStruct();
+        createApplicationProperty();
+        mainApp();
+        testApp();
+    }
+
+    public void moveFolderInStruct() {
+        String separator = "--oo--";
+        String pack = this.packageName.replaceAll("\\.", separator);
+        String[] packagePath = pack.split(separator);
+        Transform.deleteFolder(this.setup.getProjectName() + "/src/main/java/");
+        Transform.createFolder(this.setup.getProjectName() + "/src/main/java/");
+        Transform.createFolder(this.setup.getProjectName() + "/src/main/java/" + packagePath[0] + "/");
+        Transform.moveFolder(this.pathFile + packagePath[0],
+                this.setup.getProjectName() + "/src/main/java/" + packagePath[0] + "/");
     }
 
     public void buildModel(ClassBuilder classBuilder) {
         classBuilder.setTemplateFile(this.template.model);
+        classBuilder.setColumnsModels(classBuilder.getColumns());
+        classBuilder.getImports().clear();
+        classBuilder.setImports(arrayToListString(classBuilder.getLanguage().getModel().getImports()));
         classBuilder.getLanguage().setModule(classBuilder.getLanguage().getModel());
-        classBuilder.build(this.pathFile, "models");
+        classBuilder.build(this.pathFile, classBuilder.getLanguage().getModel().getContext());
     }
 
     public void buildRespository(ClassBuilder classBuilder) {
@@ -67,7 +97,7 @@ public class EntityReader {
         classBuilder.getImports().clear();
         classBuilder.setImports(arrayToListString(classBuilder.getLanguage().getRepository().getImports()));
         classBuilder.getLanguage().setModule(classBuilder.getLanguage().getRepository());
-        classBuilder.build(this.pathFile, "repository");
+        classBuilder.build(this.pathFile, classBuilder.getLanguage().getRepository().getContext());
     }
 
     public void buildController(ClassBuilder classBuilder) {
@@ -75,7 +105,7 @@ public class EntityReader {
         classBuilder.getImports().clear();
         classBuilder.setImports(arrayToListString(classBuilder.getLanguage().getController().getImports()));
         classBuilder.getLanguage().setModule(classBuilder.getLanguage().getController());
-        classBuilder.build(this.pathFile, "controllers");
+        classBuilder.build(this.pathFile, classBuilder.getLanguage().getController().getContext());
     }
 
     public List<String> arrayToListString(String[] array) {
@@ -94,6 +124,7 @@ public class EntityReader {
         List<ClassBuilder> classes = new Vector<ClassBuilder>();
 
         Language configClass = Language.getLangageConfig(this.langage.toLowerCase());
+        this.language = configClass;
         while (resultSet.next()) {
 
             String tableName = resultSet.getString("TABLE_NAME");
@@ -177,13 +208,64 @@ public class EntityReader {
 
     public void addInputData(Input input) {
         if (input != null) {
-
+            this.setSetup(input.getSetup());
             this.setPackageName(input.getPackageName());
             this.setPathFile(input.getPathFile());
             this.setTemplate(input.getSetup().getTemplate());
             this.setLangage(input.getLangage());
             this.setImports(input.getImports());
         }
+    }
+
+    public void createApplicationProperty() throws FileNotFoundException {
+        String content = Transform.getContent(this.template.getProperties());
+        content = content.replace("(name)", this.setup.getDatabase().getName());
+        content = content.replace("(host)", this.setup.getDatabase().getHost());
+        content = content.replace("(dbname)", this.setup.getDatabase().getDatabaseName());
+        content = content.replace("(username)", this.setup.getDatabase().getUsername());
+        content = content.replace("(password)", this.setup.getDatabase().getPassword());
+        content = content.replace("(port)", this.setup.getDatabase().getPort().toString());
+        content = content.replace("(driver)", this.setup.getDatabase().getDriver());
+        Transform.writeFile("application.properties", content, this.setup.getProjectName() + "/src/main/resources/");
+    }
+
+    public void mainApp() {
+        String appName = Column.CamelCase(this.setup.getProjectName()) + "Application";
+        String content = "package " + this.packageName + ";\n" +
+                "\n" +
+                "import org.springframework.boot.SpringApplication;\n" +
+                "import org.springframework.boot.autoconfigure.SpringBootApplication;\n" +
+                "\n" +
+                "@SpringBootApplication\n" +
+                "public class " + appName + " {\n" +
+                "\n" +
+                "    public static void main(String[] args) throws Exception {\n" +
+                "        SpringApplication.run(" + appName + ".class, args);\n" +
+                "\n" +
+                "    }\n" +
+                "}";
+        Transform.writeFile(appName + "." + this.langage.toLowerCase(), content,
+                this.setup.getProjectName() + "/src/main/java/" + this.packageName.replace(".", "/") + '/');
+    }
+
+    public void testApp() {
+        String appName = Column.CamelCase(this.setup.getProjectName()) + "ApplicationTests";
+        String content = "package " + this.packageName + ";\n" +
+                "\n" +
+                "import org.junit.jupiter.api.Test;\n" +
+                "import org.springframework.boot.test.context.SpringBootTest;\n" +
+                "\n" +
+                "@SpringBootTest\n" +
+                "class " + appName + " {\n" +
+                "    \n    @Test\n" +
+                "    void contextLoads() {\n" +
+                "    }\n" +
+                "}";
+        Transform.deleteFolder(this.setup.getProjectName() + "/src/test/java/");
+        Transform.createFolders(
+                this.setup.getProjectName() + "/src/test/java/" + this.packageName.replace(".", "/") + '/');
+        Transform.writeFile(appName + "." + this.langage.toLowerCase(), content,
+                this.setup.getProjectName() + "/src/test/java/" + this.packageName.replace(".", "/") + '/');
     }
 
     public String getDatabase() {
@@ -248,6 +330,22 @@ public class EntityReader {
 
     public void setTemplate(Template template) {
         this.template = template;
+    }
+
+    public Language getLanguage() {
+        return language;
+    }
+
+    public void setLanguage(Language language) {
+        this.language = language;
+    }
+
+    public Setup getSetup() {
+        return setup;
+    }
+
+    public void setSetup(Setup setup) {
+        this.setup = setup;
     }
 
 }

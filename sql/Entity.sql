@@ -20,3 +20,8 @@ CREATE TABLE people_car(
     id_car INT REFERENCES car (id) ON DELETE CASCADE ,
     date TIMESTAMP NOT NULL
 );
+
+CREATE TABLE test(
+    id SERIAL PRIMARY KEY,
+    name VARCHAR 
+);

@@ -15,6 +15,7 @@ public class Language {
     String import_ending;
     Module module;
     ///
+    ResponseHandler responseHandler;
     Model model;
     Controller controller;
     View view;
@@ -41,6 +42,14 @@ public class Language {
 
     public HashMap<String, String> getPackageSyntax() {
         return packageSyntax;
+    }
+
+    public ResponseHandler getResponseHandler() {
+        return responseHandler;
+    }
+
+    public void setResponseHandler(ResponseHandler responseHandler) {
+        this.responseHandler = responseHandler;
     }
 
     public void setPackageSyntax(HashMap<String, String> packageSyntax) {
