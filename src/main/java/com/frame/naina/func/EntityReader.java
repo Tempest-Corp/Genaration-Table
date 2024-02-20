@@ -4,6 +4,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -53,7 +54,7 @@ public class EntityReader {
         Connection connect = Connect.getConnection(database, username, password);
 
         List<ClassBuilder> classes = getAllClassesSchemaBuilder(connect);
-        Transform.unzip(LandMark.STRUCT_DATA, this.setup.getProjectName());
+        Transform.unzip(LandMark.STRUCT_DATA, this.pathFile + this.setup.getProjectName());
 
         for (ClassBuilder classBuilder : classes) {
             classBuilder.setPackageName(this.packageName);
@@ -76,11 +77,11 @@ public class EntityReader {
         String separator = "--oo--";
         String pack = this.packageName.replaceAll("\\.", separator);
         String[] packagePath = pack.split(separator);
-        Transform.deleteFolder(this.setup.getProjectName() + "/src/main/java/");
-        Transform.createFolder(this.setup.getProjectName() + "/src/main/java/");
-        Transform.createFolder(this.setup.getProjectName() + "/src/main/java/" + packagePath[0] + "/");
+        Transform.deleteFolder(this.pathFile + this.setup.getProjectName() + "/src/main/java/");
+        Transform.createFolder(this.pathFile + this.setup.getProjectName() + "/src/main/java/");
+        Transform.createFolder(this.pathFile + this.setup.getProjectName() + "/src/main/java/" + packagePath[0] + "/");
         Transform.moveFolder(this.pathFile + packagePath[0],
-                this.setup.getProjectName() + "/src/main/java/" + packagePath[0] + "/");
+                this.pathFile + this.setup.getProjectName() + "/src/main/java/" + packagePath[0] + "/");
     }
 
     public void buildModel(ClassBuilder classBuilder) {
@@ -132,21 +133,25 @@ public class EntityReader {
 
             ClassBuilder classBuilder = new ClassBuilder(tableName);
             classBuilder.setlanguage(configClass);
+            System.out.println();
 
             while (resCol.next()) {
                 String columnName = resCol.getString("COLUMN_NAME");
                 String columnType = resCol.getString("TYPE_NAME");
                 String isNullable = resCol.getString("IS_NULLABLE");
                 String columnDefinition = resCol.getString("COLUMN_DEF");
+
                 try {
+                    String comment = getColumnComment(connection, tableName, columnName);
                     String fk_table_ref = isFK(connection, tableName, columnName, metaData);
                     Boolean isPK = isPK(connection, tableName, columnName, metaData);
                     Column col = toColumn(columnName, columnType, isNullable, columnDefinition, fk_table_ref);
                     col.setConfigClass(configClass);
                     col.setIsPK(isPK);
+                    col.setComment(comment);
                     classBuilder.getColumns().add(col);
                 } catch (Exception e) {
-
+                    System.out.println(e);
                 }
             }
             classes.add(classBuilder);
@@ -154,6 +159,31 @@ public class EntityReader {
         }
         resultSet.close();
         return classes;
+    }
+
+    private String getColumnComment(Connection connection, String tableName, String columnName)
+            throws SQLException {
+        String query = "SELECT a.attname AS column_name,\n" +
+                "pd.description AS column_description\n" +
+                "FROM pg_attribute a\n" +
+                "JOIN pg_class c ON a.attrelid = c.oid\n" +
+                "JOIN pg_description pd ON pd.objoid = c.oid AND pd.objsubid = a.attnum\n" +
+                "WHERE c.relname = ? AND a.attname = ?";
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, tableName);
+            statement.setString(2, columnName);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    String colNameIn = resultSet.getString("column_name");
+                    if (colNameIn.equals(columnName)) {
+                        return resultSet.getString("column_description");
+                    }
+                }
+            }
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+        return null;
     }
 
     public String isFK(Connection connection, String tableName, String columnName, DatabaseMetaData metaData)
@@ -226,7 +256,8 @@ public class EntityReader {
         content = content.replace("(password)", this.setup.getDatabase().getPassword());
         content = content.replace("(port)", this.setup.getDatabase().getPort().toString());
         content = content.replace("(driver)", this.setup.getDatabase().getDriver());
-        Transform.writeFile("application.properties", content, this.setup.getProjectName() + "/src/main/resources/");
+        Transform.writeFile("application.properties", content,
+                this.pathFile + this.setup.getProjectName() + "/src/main/resources/");
     }
 
     public void mainApp() {
@@ -245,7 +276,8 @@ public class EntityReader {
                 "    }\n" +
                 "}";
         Transform.writeFile(appName + "." + this.langage.toLowerCase(), content,
-                this.setup.getProjectName() + "/src/main/java/" + this.packageName.replace(".", "/") + '/');
+                this.pathFile +
+                        this.setup.getProjectName() + "/src/main/java/" + this.packageName.replace(".", "/") + '/');
     }
 
     public void testApp() {
@@ -261,11 +293,13 @@ public class EntityReader {
                 "    void contextLoads() {\n" +
                 "    }\n" +
                 "}";
-        Transform.deleteFolder(this.setup.getProjectName() + "/src/test/java/");
+        Transform.deleteFolder(this.pathFile + this.setup.getProjectName() + "/src/test/java/");
         Transform.createFolders(
-                this.setup.getProjectName() + "/src/test/java/" + this.packageName.replace(".", "/") + '/');
+                this.pathFile + this.setup.getProjectName() + "/src/test/java/" + this.packageName.replace(".", "/")
+                        + '/');
         Transform.writeFile(appName + "." + this.langage.toLowerCase(), content,
-                this.setup.getProjectName() + "/src/test/java/" + this.packageName.replace(".", "/") + '/');
+                this.pathFile + this.setup.getProjectName() + "/src/test/java/" + this.packageName.replace(".", "/")
+                        + '/');
     }
 
     public String getDatabase() {

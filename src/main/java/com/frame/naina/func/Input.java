@@ -91,7 +91,6 @@ public class Input {
             this.imports.add(importDependance);
         }
 
-        // this.pathFile = this.pathFile + this.setup.getProjectName() + "/";
     }
 
     public Boolean useDefaultValue(BufferedReader bufferedReader) throws IOException {
@@ -113,7 +112,7 @@ public class Input {
         bufferedReader = new BufferedReader(new InputStreamReader(System.in));
         String username = bufferedReader.readLine();
         this.databaseUsername = empty(username) ? this.databaseUsername : username;
-        this.database.setUsername(username);
+        this.database.setUsername(this.databaseUsername);
 
         handlePassword();
     }
@@ -124,7 +123,7 @@ public class Input {
             char[] passwordArray = console.readPassword("password [" + this.getDatabase().getPassword() + "] : ");
             String password = new String(passwordArray);
             this.password = empty(password) ? this.password : password;
-            this.database.setPassword(password);
+            this.database.setPassword(this.password);
 
             java.util.Arrays.fill(passwordArray, ' ');
         }

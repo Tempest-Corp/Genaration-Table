@@ -14,6 +14,13 @@ CREATE TABLE car (
     kilometrage NUMERIC(10)
 );
 
+comment on column people.name is 'fd';
+comment on column people.ok is 'po';
+comment on column car.color is 'fdsdfs';
+comment on column car.kilometrage is 'dsd';
+comment on column car.imma is 'test';
+
+
 CREATE TABLE people_car(
     id SERIAL PRIMARY KEY ,
     id_people INT REFERENCES people (id) ON DELETE CASCADE,

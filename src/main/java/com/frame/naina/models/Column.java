@@ -12,6 +12,8 @@ public class Column {
 
     String columnDef;
 
+    String comment;
+
     String langage;
 
     Boolean isFK;
@@ -238,6 +240,14 @@ public class Column {
     public String toString() {
         return "Column [name=" + name + ", type=" + type + ", isNullable=" + isNullable + ", columnDef=" + columnDef
                 + "]";
+    }
+
+    public String getComment() {
+        return comment;
+    }
+
+    public void setComment(String comment) {
+        this.comment = comment;
     }
 
 }
