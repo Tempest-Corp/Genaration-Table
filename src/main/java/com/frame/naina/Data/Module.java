@@ -17,6 +17,7 @@ public class Module {
     String[] fieldAnnotationModule;
     String fieldEncapsulation;
     Method[] methods;
+    Form form;
 
     public String[] getImports() {
         return imports;
@@ -28,6 +29,14 @@ public class Module {
 
     public void setFieldEncapsulation(String fieldEncapsulation) {
         this.fieldEncapsulation = fieldEncapsulation;
+    }
+
+    public Form getForm() {
+        return form;
+    }
+
+    public void setForm(Form form) {
+        this.form = form;
     }
 
     public void setImports(String[] imports) {

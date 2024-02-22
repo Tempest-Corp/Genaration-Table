@@ -128,6 +128,13 @@ public class Transform {
         }
     }
 
+    public static void deleteFile(String filePath) {
+        File file = new File(filePath);
+        if (!file.delete()) {
+            System.err.println("Failed to delete: " + filePath);
+        }
+    }
+
     public static void writeFile(String file, String content, String pathFiles) {
         try {
 

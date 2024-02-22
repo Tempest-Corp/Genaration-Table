@@ -6,6 +6,8 @@ CREATE TABLE people (
     ok BOOLEAN ,
     dtn TIMESTAMP 
 );
+comment on column people.name is 'label';
+
 
 CREATE TABLE car (
     id SERIAL PRIMARY KEY ,
@@ -13,6 +15,8 @@ CREATE TABLE car (
     color VARCHAR(255) ,
     kilometrage NUMERIC(10)
 );
+comment on column car.imma is 'label';
+
 
 comment on column people.name is 'fd';
 comment on column people.ok is 'po';

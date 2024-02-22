@@ -1,0 +1,39 @@
+const DeleteButton = (props) => {
+  const [openModal, setOpenModal] = useState(false);
+
+  const handleModal = () => {
+    setOpenModal(!openModal);
+  };
+  const handleDelete = async () => {
+    let res = await alaivoDelete(`(ClassNameMin)/${props.(pkField)}`);
+    handleModal();
+    setTimeout(() => {
+      props.getData(() => {
+        props.addNotifs(res.status, res.message, 2000);
+      });
+    }, 200);
+  };
+  return (
+    <>
+      <AnimatePresence>
+        {openModal && (
+          <ValidationModal
+            callBack={() => {
+              handleDelete();
+            }}
+            validationText={"Ok"}
+            content="Etes vous sur de vouloir supprimer ce (ClassName) ?"
+            cancelOn
+            closer={() => {
+              handleModal();
+            }}
+            title="Suppression"
+          />
+        )}
+      </AnimatePresence>
+      <div className="icon " onClick={handleModal}>
+        <TrashIcon/>
+      </div>
+    </>
+  );
+};

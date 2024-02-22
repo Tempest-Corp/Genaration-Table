@@ -1,0 +1,54 @@
+const UpdateButton = (props) => {
+  const [openModal, setOpenModal] = useState(false);
+  const [formData, setFormData] = useState({ (pkField): props.(pkField) });
+  (stateFk)
+
+  const handleForm = async (e) => {
+    e.preventDefault();
+    let res = await alaivoPut("(ClassNameMin)", JSON.stringify(formData), null, true);
+    console.log(res);
+    handleModal();
+    setTimeout(() => {
+      props.getData(() => {
+        props.addNotifs(res.status, res.message, 2000);
+      });
+    }, 200);
+  };
+
+  const handleInput = (e) => {
+    setFormData((formData) => ({ ...formData, [e.target.name]: e.target.value }));
+  };
+
+  const handleModal = () => {
+    setOpenModal(!openModal);
+  };
+
+  // generated
+  (FkFetch)
+
+
+  useEffect(() => {
+    (callbackFkFetch)
+  }, []);
+
+  return (
+    <>
+      <AnimatePresence>
+        {openModal && (
+          <Modal closer={handleModal}>
+            <Box className="form__box">
+              <form onSubmit={handleForm} className="form_crud">
+                <div className="title"> Modifier Type </div>
+                (inputs)
+                <button>Validate</button>
+              </form>
+            </Box>
+          </Modal>
+        )}
+      </AnimatePresence>
+      <div className="icon" onClick={handleModal}>
+        <EditIcon/>
+      </div>
+    </>
+  );
+};

@@ -1,5 +1,7 @@
 package com.frame.naina.models;
 
+import java.util.List;
+
 import com.frame.naina.Data.Language;
 
 public class Column {
@@ -159,6 +161,73 @@ public class Column {
             return text;
         }
         return toCamelCase(text);
+    }
+
+    public String getFkLabel(List<ClassBuilder> classes) {
+        ClassBuilder classBuilder = null;
+        String defaultLabel = "id";
+
+        for (ClassBuilder cls : classes) {
+            if (cls.getTableName().equals(this.FK_ref_table)) {
+                classBuilder = cls;
+                break;
+            }
+        }
+        if (classBuilder == null)
+            return "[\"" + this.getName() + "\",\"" + defaultLabel
+                    + "\"]";
+        else {
+            Column columnLabel = getLabelFkColumn(classBuilder.getColumnsModels());
+            return "[\"" + this.getName() + "\",\"" + (columnLabel.equals(null) ? defaultLabel : columnLabel.getName())
+                    + "\"]";
+        }
+    }
+
+    public String getFkLabelArray(List<ClassBuilder> classes) {
+        ClassBuilder classBuilder = null;
+        String defaultLabel = "id";
+
+        for (ClassBuilder cls : classes) {
+            if (cls.getTableName().equals(this.FK_ref_table)) {
+                classBuilder = cls;
+                break;
+            }
+        }
+        if (classBuilder == null)
+            return "[\"" + this.getName() + "\"][\"" + defaultLabel
+                    + "\"]";
+        else {
+            Column columnLabel = getLabelFkColumn(classBuilder.getColumnsModels());
+            return "[\"" + this.getName() + "\"][\"" + (columnLabel.equals(null) ? defaultLabel : columnLabel.getName())
+                    + "\"]";
+        }
+    }
+
+    public String getFkLabelName(List<ClassBuilder> classes) {
+        ClassBuilder classBuilder = null;
+        String defaultLabel = "id";
+
+        for (ClassBuilder cls : classes) {
+            if (cls.getTableName().equals(this.FK_ref_table)) {
+                classBuilder = cls;
+                break;
+            }
+        }
+        if (classBuilder == null) {
+            return defaultLabel;
+        } else {
+            Column columnLabel = getLabelFkColumn(classBuilder.getColumnsModels());
+            return columnLabel.getName();
+        }
+    }
+
+    public Column getLabelFkColumn(List<Column> columns) {
+        for (Column column : columns) {
+            if (column.getComment() != null)
+                if (column.getComment().equals("label"))
+                    return column;
+        }
+        return null;
     }
 
     public String getName() {

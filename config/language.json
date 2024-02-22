@@ -14,6 +14,8 @@
       "OBJECT": "Object",
       "STRING": "String"
     },
+    "mainTemplate": "templateClass/Main.templ",
+    "testTemplate": "templateClass/Test.templ",
     "packageSyntax": {
       "variable": "package",
       "start": ";",
@@ -88,6 +90,7 @@
         "org.springframework.web.bind.annotation.RestController",
         "org.springframework.web.bind.annotation.PostMapping",
         "org.springframework.web.bind.annotation.RequestBody",
+        "org.springframework.web.bind.annotation.PathVariable",
         "org.springframework.web.bind.annotation.PutMapping",
         "org.springframework.web.bind.annotation.DeleteMapping",
         "org.springframework.web.bind.annotation.ExceptionHandler",
@@ -131,7 +134,29 @@
         }
       ]
     },
-    "view": {}
+    "view": {
+      "context": "view",
+      "form": {
+        "base_url": "http://localhost:8087/",
+        "addTemplate": "templateClass/view/addView.templ",
+        "deleteTemplate": "templateClass/view/deleteView.templ",
+        "updateTemplate": "templateClass/view/updateView.templ",
+        "dataTemplate": "templateClass/view/dataView.templ",
+        "types": {
+          "VARCHAR": "text",
+          "NUMERIC": "text",
+          "SERIAL": "text",
+          "BOOL": "text",
+          "TIMESTAMP": "date",
+          "INT4": "number",
+          "INT8": "number",
+          "BIGSERIAL": "text",
+          "FLOAT8": "text",
+          "OBJECT": "text",
+          "STRING": "text"
+        }
+      }
+    }
   },
   {
     "name": "cs",

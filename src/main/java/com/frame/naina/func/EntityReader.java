@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
+import com.frame.naina.Data.Form;
 import com.frame.naina.Data.LandMark;
 import com.frame.naina.Data.Language;
 import com.frame.naina.Data.Setup;
@@ -51,7 +52,7 @@ public class EntityReader {
     }
 
     public void readTables() throws SQLException, FileNotFoundException, IOException {
-        Connection connect = Connect.getConnection(database, username, password);
+        Connection connect = Connect.getConnection(this.setup.getDatabase());
 
         List<ClassBuilder> classes = getAllClassesSchemaBuilder(connect);
         Transform.unzip(LandMark.STRUCT_DATA, this.pathFile + this.setup.getProjectName());
@@ -63,6 +64,7 @@ public class EntityReader {
             buildRespository(classBuilder);
             buildController(classBuilder);
         }
+        buildView(classes);
         if (this.language.getResponseHandler() != null)
             this.language.getResponseHandler().build(this);
 
@@ -109,6 +111,15 @@ public class EntityReader {
         classBuilder.build(this.pathFile, classBuilder.getLanguage().getController().getContext());
     }
 
+    public void buildView(List<ClassBuilder> classes) throws IOException {
+        for (ClassBuilder classBuilder : classes) {
+            classBuilder.getImports().clear();
+            classBuilder.getLanguage().setModule(classBuilder.getLanguage().getView());
+        }
+        Form.handleView(classes, this.language, this.setup.getProjectName(), this.pathFile);
+
+    }
+
     public List<String> arrayToListString(String[] array) {
         List<String> list = new ArrayList<String>();
         for (String s : array) {
@@ -133,8 +144,6 @@ public class EntityReader {
 
             ClassBuilder classBuilder = new ClassBuilder(tableName);
             classBuilder.setlanguage(configClass);
-            System.out.println();
-
             while (resCol.next()) {
                 String columnName = resCol.getString("COLUMN_NAME");
                 String columnType = resCol.getString("TYPE_NAME");
@@ -180,6 +189,7 @@ public class EntityReader {
                     }
                 }
             }
+            statement.close();
         } catch (Exception e) {
             System.out.println(e);
         }
@@ -260,39 +270,24 @@ public class EntityReader {
                 this.pathFile + this.setup.getProjectName() + "/src/main/resources/");
     }
 
-    public void mainApp() {
+    public void mainApp() throws FileNotFoundException {
         String appName = Column.CamelCase(this.setup.getProjectName()) + "Application";
-        String content = "package " + this.packageName + ";\n" +
-                "\n" +
-                "import org.springframework.boot.SpringApplication;\n" +
-                "import org.springframework.boot.autoconfigure.SpringBootApplication;\n" +
-                "\n" +
-                "@SpringBootApplication\n" +
-                "public class " + appName + " {\n" +
-                "\n" +
-                "    public static void main(String[] args) throws Exception {\n" +
-                "        SpringApplication.run(" + appName + ".class, args);\n" +
-                "\n" +
-                "    }\n" +
-                "}";
+        String content = Transform.getContent(this.language.getMainTemplate());
+        content = content.replace("(appName)", appName);
+        content = content.replace("(package_name)", this.packageName);
+
         Transform.writeFile(appName + "." + this.langage.toLowerCase(), content,
                 this.pathFile +
                         this.setup.getProjectName() + "/src/main/java/" + this.packageName.replace(".", "/") + '/');
     }
 
-    public void testApp() {
+    public void testApp() throws FileNotFoundException {
         String appName = Column.CamelCase(this.setup.getProjectName()) + "ApplicationTests";
-        String content = "package " + this.packageName + ";\n" +
-                "\n" +
-                "import org.junit.jupiter.api.Test;\n" +
-                "import org.springframework.boot.test.context.SpringBootTest;\n" +
-                "\n" +
-                "@SpringBootTest\n" +
-                "class " + appName + " {\n" +
-                "    \n    @Test\n" +
-                "    void contextLoads() {\n" +
-                "    }\n" +
-                "}";
+        String content = Transform.getContent(this.language.getTestTemplate());
+        content = content.replace("(testName)", appName);
+        content = content.replace("(appName)", appName);
+        content = content.replace("(package_name)", this.packageName);
+
         Transform.deleteFolder(this.pathFile + this.setup.getProjectName() + "/src/test/java/");
         Transform.createFolders(
                 this.pathFile + this.setup.getProjectName() + "/src/test/java/" + this.packageName.replace(".", "/")

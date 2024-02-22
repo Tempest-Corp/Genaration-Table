@@ -14,6 +14,9 @@ public class Language {
     String import_var;
     String import_ending;
     Module module;
+    String mainTemplate;
+    String testTemplate;
+
     ///
     ResponseHandler responseHandler;
     Model model;
@@ -125,6 +128,22 @@ public class Language {
         return "Language [name=" + name + ", types=" + types + ", packageSyntax=" + packageSyntax + ", import_var="
                 + import_var + ", import_ending=" + import_ending + ", model=" + model + ", controller=" + controller
                 + ", view=" + view + "]";
+    }
+
+    public String getMainTemplate() {
+        return mainTemplate;
+    }
+
+    public void setMainTemplate(String mainTemplate) {
+        this.mainTemplate = mainTemplate;
+    }
+
+    public String getTestTemplate() {
+        return testTemplate;
+    }
+
+    public void setTestTemplate(String testTemplate) {
+        this.testTemplate = testTemplate;
     }
 
 }

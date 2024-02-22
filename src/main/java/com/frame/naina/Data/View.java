@@ -1,5 +1,5 @@
 package com.frame.naina.Data;
 
-public class View {
+public class View extends Module {
 
 }

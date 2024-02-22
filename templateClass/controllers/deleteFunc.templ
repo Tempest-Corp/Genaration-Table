@@ -1,4 +1,4 @@
-\tpublic (responseHandlerName) delete((pkType) (pkField)){
+\tpublic (responseHandlerName) delete(@PathVariable(name="id")(pkType) (pkField)){
 \t    (RepositoryClass).deleteById((pkField));
-\t    return null; 
+\t    return new (responseHandlerName)("ok", "(ClassName) deleted !!",null); 
 \t}
