@@ -271,18 +271,20 @@ public class EntityReader {
     }
 
     public void mainApp() throws FileNotFoundException {
-        String appName = Column.CamelCase(this.setup.getProjectName()) + "Application";
+
+        String appName = Column.CamelCase(this.setup.getProjectName().trim().replace(" ", "")) + "Application";
         String content = Transform.getContent(this.language.getMainTemplate());
         content = content.replace("(appName)", appName);
         content = content.replace("(package_name)", this.packageName);
 
         Transform.writeFile(appName + "." + this.langage.toLowerCase(), content,
                 this.pathFile +
-                        this.setup.getProjectName() + "/src/main/java/" + this.packageName.replace(".", "/") + '/');
+                        this.setup.getProjectName() + "/src/main/java/"
+                        + this.packageName.replace(".", "/") + '/');
     }
 
     public void testApp() throws FileNotFoundException {
-        String appName = Column.CamelCase(this.setup.getProjectName()) + "ApplicationTests";
+        String appName = Column.CamelCase(this.setup.getProjectName().trim().replace(" ", "")) + "ApplicationTests";
         String content = Transform.getContent(this.language.getTestTemplate());
         content = content.replace("(testName)", appName);
         content = content.replace("(appName)", appName);
@@ -293,7 +295,8 @@ public class EntityReader {
                 this.pathFile + this.setup.getProjectName() + "/src/test/java/" + this.packageName.replace(".", "/")
                         + '/');
         Transform.writeFile(appName + "." + this.langage.toLowerCase(), content,
-                this.pathFile + this.setup.getProjectName() + "/src/test/java/" + this.packageName.replace(".", "/")
+                this.pathFile + this.setup.getProjectName() + "/src/test/java/"
+                        + this.packageName.replace(".", "/")
                         + '/');
     }
 

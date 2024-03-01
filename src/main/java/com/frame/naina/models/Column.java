@@ -178,8 +178,14 @@ public class Column {
                     + "\"]";
         else {
             Column columnLabel = getLabelFkColumn(classBuilder.getColumnsModels());
-            return "[\"" + this.getName() + "\",\"" + (columnLabel.equals(null) ? defaultLabel : columnLabel.getName())
-                    + "\"]";
+            if (columnLabel != null)
+                return "[\"" + this.getName() + "\",\""
+                        + (columnLabel.getName())
+                        + "\"]";
+            else
+                return "[\"" + this.getName() + "\",\""
+                        + (defaultLabel)
+                        + "\"]";
         }
     }
 
@@ -198,8 +204,15 @@ public class Column {
                     + "\"]";
         else {
             Column columnLabel = getLabelFkColumn(classBuilder.getColumnsModels());
-            return "[\"" + this.getName() + "\"][\"" + (columnLabel.equals(null) ? defaultLabel : columnLabel.getName())
-                    + "\"]";
+            if (columnLabel != null)
+
+                return "[\"" + this.getName() + "\"][\""
+                        + (columnLabel.getName())
+                        + "\"]";
+            else
+                return "[\"" + this.getName() + "\"][\""
+                        + (defaultLabel)
+                        + "\"]";
         }
     }
 
@@ -217,7 +230,10 @@ public class Column {
             return defaultLabel;
         } else {
             Column columnLabel = getLabelFkColumn(classBuilder.getColumnsModels());
-            return columnLabel.getName();
+            if (columnLabel != null)
+                return columnLabel.getName();
+            else
+                return defaultLabel;
         }
     }
 

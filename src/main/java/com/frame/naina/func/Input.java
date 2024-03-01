@@ -134,16 +134,18 @@ public class Input {
         Boolean correct = false;
         while (!correct) {
             System.out.println("What do you want to use : ");
-            System.out.println(" a) " + this.langage + " [default]");
-            System.out.println(" b) C#");
+            for (int i = 1; i < allLanguages.length + 1; i++) {
+                System.out.println(i + ") " + this.allLanguages[i - 1].getName() + (i == 1 ? " [default]" : ""));
+            }
             System.out.print("=> ");
             bufferedReader = new BufferedReader(new InputStreamReader(System.in));
             String langage = bufferedReader.readLine();
-            if (empty(langage))
+            if (empty(langage)) {
+                this.langage = allLanguages[0].getName().toUpperCase();
                 correct = true;
-            else {
+            } else {
                 langage = langage.toLowerCase().trim();
-                langage = getLangageEquivalence(langage);
+                langage = getLangageEquivalence(Integer.valueOf(langage));
                 if (langage != null) {
                     this.langage = langage;
                     correct = true;
@@ -191,13 +193,17 @@ public class Input {
         System.out.println("");
     }
 
-    public String getLangageEquivalence(String text) {
-        HashMap<String, String> typeMap = new HashMap<String, String>();
+    public String getLangageEquivalence(int choiceIndex) {
+        HashMap<Integer, String> typeMap = new HashMap<Integer, String>();
 
-        typeMap.put("a", "JAVA");
-        typeMap.put("b", "CS");
+        int index = 1;
+        for (Language language : allLanguages) {
+            typeMap.put(index, language.getName().toUpperCase());
+            index++;
+        }
 
-        String equivalence = typeMap.get(text);
+        String equivalence = typeMap.get(choiceIndex);// nampitoboko ho manoboka 1 mantsy
+        System.out.println(equivalence);
 
         return equivalence;
     }

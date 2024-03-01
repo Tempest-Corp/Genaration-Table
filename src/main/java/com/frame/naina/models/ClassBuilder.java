@@ -405,6 +405,7 @@ public class ClassBuilder {
         String repositoryContext = "(repositoryContext)";
 
         content = content.replace(responseHandlerContext, this.language.getResponseHandler().getContext());
+
         content = content.replace(modelContext, this.language.getModel().getContext());
         content = content.replace(controllerContext, this.language.getController().getContext());
         content = content.replace(repositoryContext, this.language.getRepository().getContext());

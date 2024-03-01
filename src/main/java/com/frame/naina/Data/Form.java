@@ -58,6 +58,13 @@ public class Form {
         Transform.writeFile("HeadNav.jsx", HeadNavFile, rootPath + "/src/components/Navbar/HeadNav/");
         Transform.deleteFile(rootPath + "/src/components/Navbar/HeadNav/" + HeadNavJxs);
 
+        // projectName
+        String HomeJxs = "Home.templ";
+        String HomeFile = Transform.getContent(rootPath + "/src/components/Home/" + HomeJxs);
+        HomeFile = HomeFile.replace("(projectName)", projectName);
+        Transform.writeFile("Home.jsx", HomeFile, rootPath + "/src/components/Home/");
+        Transform.deleteFile(rootPath + "/src/components/Home/" + HomeJxs);
+
         String TempJsx = "Temp.templ";
 
         for (ClassBuilder classBuilder : classes) {
