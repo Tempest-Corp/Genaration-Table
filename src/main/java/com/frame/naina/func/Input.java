@@ -203,7 +203,6 @@ public class Input {
         }
 
         String equivalence = typeMap.get(choiceIndex);// nampitoboko ho manoboka 1 mantsy
-        System.out.println(equivalence);
 
         return equivalence;
     }
