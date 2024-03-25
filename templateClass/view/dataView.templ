@@ -1,5 +1,19 @@
- const res = await alaivoGet("(ClassNameMin)");
+const rowsCount = 5 ;
+const res = await alaivoGet(`(ClassNameMin)/${0}/count/${rowsCount}`);
+const pageCount = await alaivoGet("(ClassNameMin)/page/"+rowsCount);
+
     let dataTable = {
+      rowsCount:rowsCount,
+      paginationOn:true,
+      pageCount:pageCount.data,
+      callBackPagination: async (index) => {
+        const res = await alaivoGet(`(ClassNameMin)/${index}/count/${rowsCount}`);
+        let dataTable = res.data.map((row) => ({
+          ...row,
+          buttons: <Buttons {...row} getData={getData} addNotifs={addNotifs} />,
+        }));
+        return dataTable;
+      },
       headerOn: { title: "Liste de (className)", under_component: "" },
       titles: [(title_field)],
       index: [(fields_indexation)],

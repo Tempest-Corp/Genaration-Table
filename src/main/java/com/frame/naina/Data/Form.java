@@ -153,7 +153,7 @@ public class Form {
         //
         String inputs = "";
         for (Column column : classBuilder.getColumnsModels()) {
-            inputs += getColumnInput(column, form);
+            inputs += getColumnInput(column, form, classes);
         }
 
         content = content.replace("(FkFetch)", fkStateFetch);
@@ -165,13 +165,15 @@ public class Form {
         return content;
     }
 
-    public static String getColumnInput(Column column, Form form) {
+    public static String getColumnInput(Column column, Form form, List<ClassBuilder> classes) {
         String content = "";
         if (column.getIsFK()) {
             content = "<Select\n" + //
                     "  onChange={handleInput}\n" + //
                     "  name={\"" + column.getName() + "\"}\n" + //
                     "  fullWidth\n" + //
+                    "  defaultValue={ props." + column.getName() + " ? { value: props." + column.getName()
+                    + ", label: props." + column.getName() + "." + column.getFkLabelName(classes) + " }: undefined}" +
                     "  title={\"" + Column.CamelCase(column.getName()) + "\"}\n" + //
                     "  optionsType={" + column.getName() + "}\n" + //
                     " />\n";

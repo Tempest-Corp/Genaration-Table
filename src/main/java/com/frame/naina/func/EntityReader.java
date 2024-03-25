@@ -75,7 +75,7 @@ public class EntityReader {
         testApp();
     }
 
-    public void moveFolderInStruct() {
+    public void moveFolderInStruct() throws IOException {
         String separator = "--oo--";
         String pack = this.packageName.replaceAll("\\.", separator);
         String[] packagePath = pack.split(separator);
@@ -84,6 +84,15 @@ public class EntityReader {
         Transform.createFolder(this.pathFile + this.setup.getProjectName() + "/src/main/java/" + packagePath[0] + "/");
         Transform.moveFolder(this.pathFile + packagePath[0],
                 this.pathFile + this.setup.getProjectName() + "/src/main/java/" + packagePath[0] + "/");
+        //
+        // move auth folder into the project source
+        StringBuffer pathSrc = new StringBuffer();
+        for (int i = 0; i < packagePath.length; i++) {
+            pathSrc.append(packagePath[i] + "/");
+        }
+        String srcPath = this.pathFile + this.setup.getProjectName() + "/src/main/java/" + pathSrc;
+        Transform.unzip(LandMark.AUTH_DATA, srcPath);
+        Transform.rewriteAll(srcPath + LandMark.AUTH_FOLDER_NAME, "(package_name)", packageName);
     }
 
     public void buildModel(ClassBuilder classBuilder) {
@@ -128,6 +137,11 @@ public class EntityReader {
         return list;
     }
 
+    public Boolean isIgnored(String tableName) {
+        List<String> tableToIgnore = arrayToListString(this.language.getIgnoreTable());
+        return tableToIgnore.contains(tableName);
+    }
+
     public List<ClassBuilder> getAllClassesSchemaBuilder(Connection connection)
             throws SQLException, FileNotFoundException {
         DatabaseMetaData metaData = connection.getMetaData();
@@ -140,6 +154,10 @@ public class EntityReader {
         while (resultSet.next()) {
 
             String tableName = resultSet.getString("TABLE_NAME");
+            // ignore specified table
+            if (isIgnored(tableName))
+                continue;
+
             ResultSet resCol = metaData.getColumns(null, null, tableName, null);
 
             ClassBuilder classBuilder = new ClassBuilder(tableName);

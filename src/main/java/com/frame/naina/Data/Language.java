@@ -16,6 +16,7 @@ public class Language {
     Module module;
     String mainTemplate;
     String testTemplate;
+    String ignoreTable[];
 
     ///
     ResponseHandler responseHandler;
@@ -144,6 +145,14 @@ public class Language {
 
     public void setTestTemplate(String testTemplate) {
         this.testTemplate = testTemplate;
+    }
+
+    public String[] getIgnoreTable() {
+        return ignoreTable;
+    }
+
+    public void setIgnoreTable(String[] ignoreTable) {
+        this.ignoreTable = ignoreTable;
     }
 
 }

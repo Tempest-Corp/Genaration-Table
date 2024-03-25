@@ -5,7 +5,7 @@ const UpdateButton = (props) => {
 
   const handleForm = async (e) => {
     e.preventDefault();
-    let res = await alaivoPut("(ClassNameMin)", JSON.stringify(formData), null, true);
+    let res = await alaivoPut("(ClassNameMin)", JSON.stringify(formData), null, false);
     console.log(res);
     handleModal();
     setTimeout(() => {
@@ -38,7 +38,7 @@ const UpdateButton = (props) => {
           <Modal closer={handleModal}>
             <Box className="form__box">
               <form onSubmit={handleForm} className="form_crud">
-                <div className="title"> Modifier Type </div>
+                <div className="title"> Modifier (className) </div>
                 (inputs)
                 <button>Validate</button>
               </form>

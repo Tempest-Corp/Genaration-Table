@@ -169,4 +169,27 @@ public class Transform {
         }
 
     }
+
+    public static void rewriteAll(String filePath, String textToReplace, String replacement) {
+
+        try {
+            File file = new File(filePath);
+            if (file.isDirectory()) {
+                File[] files = file.listFiles();
+                for (File f : files) {
+                    rewriteAll(f.getAbsolutePath(), textToReplace, replacement);
+                }
+            } else {
+                String content = getContent(file.getAbsolutePath());
+                content = content.replace(textToReplace, replacement);
+                Path path = file.toPath();
+                emptyFile(path.toAbsolutePath().toString());
+                Files.writeString(path, content, StandardCharsets.UTF_8, StandardOpenOption.CREATE,
+                        StandardOpenOption.WRITE);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+    }
 }

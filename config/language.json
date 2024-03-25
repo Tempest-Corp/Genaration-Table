@@ -34,6 +34,7 @@
       "fieldAnnotationModule": [],
       "context": "utils"
     },
+    "ignoreTable": ["_user", "refresh_token"],
     "model": {
       "context": "models",
       "classNameExtension": "",
@@ -49,10 +50,7 @@
       "pkAnnotationModule": ["@Id", "@GeneratedValue(strategy = GenerationType.AUTO)"],
       "pkType": "Long",
       "fieldEncapsulation": "public ",
-      "fkAnnotationModule": [
-        "@jakarta.persistence.ManyToOne",
-        "@jakarta.persistence.JoinColumn(name = \"(fieldName_only)\")"
-      ],
+      "fkAnnotationModule": ["@jakarta.persistence.ManyToOne", "@jakarta.persistence.JoinColumn(name = \"(fieldName_only)\")"],
       "fieldAnnotationModule": ["@Column"],
       "extendsModule": "",
       "fieldEnding": ";",
@@ -64,10 +62,7 @@
     "repository": {
       "context": "repository",
       "classNameExtension": "Repository",
-      "imports": [
-        "(package_name_only).(modelContext).(class_name_only)",
-        "org.springframework.data.jpa.repository.JpaRepository"
-      ],
+      "imports": ["(package_name_only).(modelContext).(class_name_only)", "org.springframework.data.jpa.repository.JpaRepository"],
       "annotationsModule": ["@Repository(name=\"(tableName)\")"],
       "pkAnnotationModule": [],
       "pkType": "",
@@ -97,7 +92,9 @@
         "org.springframework.beans.factory.annotation.Autowired",
         "java.util.List",
         "(package_name_only).(responseHandlerContext).(responseHandlerName)",
-        "(package_name_only).(modelContext).(class_name_only)"
+        "(package_name_only).(modelContext).(class_name_only)",
+        "org.springframework.data.domain.PageRequest",
+        "org.springframework.data.domain.Pageable"
       ],
       "annotationsModule": ["@RestController", "@RequestMapping(\"/(ClassNameMin)\")"],
       "pkAnnotationModule": [],
@@ -122,7 +119,15 @@
         },
         {
           "annotations": ["@GetMapping"],
+          "templatePath": "templateClass/controllers/readAllFunc.templ"
+        },
+        {
+          "annotations": ["@GetMapping(\"/{page}/count/{count}\")"],
           "templatePath": "templateClass/controllers/readFunc.templ"
+        },
+        {
+          "annotations": ["@GetMapping(\"/page/{count}\")"],
+          "templatePath": "templateClass/controllers/paginationFunc.templ"
         },
         {
           "annotations": ["@PutMapping"],

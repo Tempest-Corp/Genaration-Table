@@ -1,0 +1,5 @@
+\tpublic (responseHandlerName) getPageCount(@PathVariable("count") int count){
+\t    Pageable pageable = PageRequest.of(0, count);
+\t    int totalPage =(RepositoryClass).findAll(pageable).getTotalPages();
+\t    return new (responseHandlerName)("ok", null,totalPage); 
+\t}
